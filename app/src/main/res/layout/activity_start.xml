@@ -7,4 +7,31 @@
     android:layout_height="match_parent"
     tools:context=".StartActivity">
 
+    <Spinner
+        android:id="@+id/spinnerFoundBTDevices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="Refresh"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnMakeDiscoverable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Make Discoverable"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="152dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
