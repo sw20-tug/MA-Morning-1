@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">CHEAT</string>
-<<<<<<< HEAD
-=======
     <string name="text_entry">Enter a message</string>
     <string name="button_send">Send</string>
->>>>>>> e37c126c836171c58d15e181e32932af0a5507fb
 </resources>
