@@ -80,32 +80,6 @@
             android:onClick="sendMessage"
             android:padding="20dp"
             app:srcCompat="@drawable/ic_send" />
-
-
-        <!--        <Button-->
-        <!--            android:id="@+id/button_send"-->
-        <!--            android:layout_width="179dp"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:onClick="sendMessage"-->
-        <!--            android:text="@string/button_send"-->
-        <!--            app:layout_constraintStart_toEndOf="@+id/text_entry" />-->
-
-        <!--        <EditText-->
-        <!--            android:id="@+id/text_entry"-->
-        <!--            android:layout_width="246dp"-->
-        <!--            android:layout_height="56dp"-->
-        <!--            android:background="#FFFFFF"-->
-        <!--            android:ellipsize="none"-->
-        <!--            android:ems="10"-->
-        <!--            android:inputType="textPersonName"-->
-        <!--            android:text="@string/text_entry"-->
-        <!--            tools:layout_editor_absoluteX="23dp"-->
-        <!--            tools:layout_editor_absoluteY="613dp" />-->
-        <!--        <TextView-->
-        <!--            android:id="@+id/textView"-->
-        <!--            android:layout_width="319dp"-->
-        <!--            android:layout_height="104dp"-->
-        <!--            android:text="TextView" />-->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
