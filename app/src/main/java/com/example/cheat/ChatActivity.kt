@@ -2,6 +2,8 @@ package com.example.cheat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.print.PrintAttributes
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -41,6 +43,7 @@ class ChatActivity : AppCompatActivity() {
                 gravity = Gravity.RIGHT
                 bottomMargin = 10;
                 topMargin = 10;
+                rightMargin = 15;
             }
 
             layout?.addView(textView);
