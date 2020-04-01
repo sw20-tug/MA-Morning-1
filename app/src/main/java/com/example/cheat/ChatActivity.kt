@@ -1,7 +1,9 @@
 package com.example.cheat
 
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -18,10 +20,17 @@ class ChatActivity : AppCompatActivity() {
         // Do something in response to button click
         val textView = TextView(this);
         textView.text = text_entry.text;
+
         textView.setTextSize(25f);
+        textView.setTextColor(getColor(R.color.white));
+        textView.setBackgroundResource(R.drawable.text_view_shape);
+
         textView.layoutParams= LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+            gravity = Gravity.RIGHT
+            bottomMargin = 10;
+        }
 
         layout ?.addView(textView);
     }

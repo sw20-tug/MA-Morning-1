@@ -7,6 +7,7 @@
     android:background="#749DAF"
     tools:context=".ChatActivity">
 
+
     <EditText
         android:id="@+id/text_entry"
         android:layout_width="0dp"
@@ -25,6 +26,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.47"
         app:layout_constraintStart_toStartOf="parent" />
+
 
     <Button
         android:id="@+id/button_send"
