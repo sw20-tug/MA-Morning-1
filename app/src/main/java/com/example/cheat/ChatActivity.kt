@@ -2,6 +2,7 @@ package com.example.cheat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -44,6 +45,7 @@ class ChatActivity : AppCompatActivity() {
             }
 
             layout?.addView(textView);
+            history.fullScroll(ScrollView.FOCUS_DOWN)
         }
     }
 
