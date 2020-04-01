@@ -2,17 +2,29 @@ package com.example.cheat
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothServerSocket
+import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Parcelable
+import android.util.Log
 import android.widget.Toast
+import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
     private val context : Context = cnt
     private val bt : BluetoothAdapter = blt
     private var list: ArrayList<String> = ArrayList()
+    private var deviceList : HashMap<String, BluetoothDevice> = HashMap()
+
+    private val serviceName: String = "CHEAT"
+    private val serviceUUID: UUID = UUID.fromString("0b538899-008d-40ed-a0dc-6e657c3be729")
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -25,12 +37,15 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 Toast.makeText(context, "Discovery finished", Toast.LENGTH_SHORT).show()
             } else if (BluetoothDevice.ACTION_FOUND == action) { //bluetooth device found
                 val device = intent.getParcelableExtra<Parcelable>(BluetoothDevice.EXTRA_DEVICE) as BluetoothDevice
-                list.add(device.name + " (" + device.address + ")")
+                val listEntry = device.name + " (" + device.address + ")"
+                list.add(listEntry)
+                deviceList[listEntry] = device
             }
         }
     }
 
     fun refresh(): ArrayList<String> {
+        deviceList.clear()
         list = ArrayList()
         checkForBondedDevices()
         startDiscovery()
@@ -42,7 +57,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         if (pairedDevices != null) {
             if (pairedDevices.isNotEmpty()) {
                 pairedDevices?.forEach { device ->
-                    list.add(device.name + " (" + device.address + ")")
+                    val listEntry = device.name + " (" + device.address + ")"
+                    list.add(listEntry)
+                    deviceList[listEntry] = device
                 }
             }
             else {
@@ -67,11 +84,99 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         Toast.makeText(context, "Started making ourselves discoverable", Toast.LENGTH_SHORT).show()
         try {
             val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 30)
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
             context.startActivity(discoverableIntent)
         } catch (e: Exception) {
             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
         }
         //Toast.makeText(context, "Finished making ourselves discoverable", Toast.LENGTH_SHORT).show()
+    }
+
+    fun startAcceptThread(): AcceptThread {
+        return AcceptThread()
+    }
+
+    fun startConnectThread(deviceEntry: String): ConnectThread {
+        val dev : BluetoothDevice? = deviceList[deviceEntry]
+        if (dev == null) {
+            Log.d(TAG, "Could not connect to the Device " + deviceEntry)
+            throw java.lang.Exception("Could not connect to the Device " + deviceEntry)
+        }
+        else {
+            return ConnectThread(dev)
+        }
+    }
+
+    inner class AcceptThread : Thread() {
+
+        private val mmServerSocket: BluetoothServerSocket? by lazy(LazyThreadSafetyMode.NONE) {
+            bt?.listenUsingInsecureRfcommWithServiceRecord(serviceName, serviceUUID)
+        }
+
+        override fun run() {
+            // Keep listening until exception occurs or a socket is returned.
+            var shouldLoop = true
+            while (shouldLoop) {
+                val socket: BluetoothSocket? = try {
+                    mmServerSocket?.accept()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Socket's accept() method failed", e)
+                    shouldLoop = false
+                    null
+                }
+                socket?.also {
+                    Log.d(TAG, "connecting to " + it.remoteDevice.name)
+                    Toast.makeText(context, it.remoteDevice.name + " we want to connect to", Toast.LENGTH_LONG).show()
+                    mmServerSocket?.close()
+                    sleep(400000)
+                    shouldLoop = false
+                    Log.d(TAG, "Finished connecting to " + it.remoteDevice.name)
+                }
+            }
+        }
+
+        // Closes the connect socket and causes the thread to finish.
+        fun cancel() {
+            try {
+                mmServerSocket?.close()
+            } catch (e: IOException) {
+                Log.e(TAG, "Could not close the connect socket", e)
+            }
+        }
+    }
+
+    inner class ConnectThread(device: BluetoothDevice) : Thread() {
+        private val dev : BluetoothDevice = device
+
+        private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
+            device.createRfcommSocketToServiceRecord(serviceUUID)
+        }
+
+        public override fun run() {
+            // Cancel discovery because it otherwise slows down the connection.
+            bt?.cancelDiscovery()
+
+            mmSocket?.use { socket ->
+                // Connect to the remote device through the socket. This call blocks
+                // until it succeeds or throws an exception.
+                Log.d(TAG, "Starting connecting to " + dev.name)
+                socket.connect()
+                Log.d(TAG, "Finished connecting to " + dev.name)
+                Toast.makeText(context, "I connected to " + dev.name, Toast.LENGTH_LONG)
+
+                // The connection attempt succeeded. Perform work associated with
+                // the connection in a separate thread.
+                // manageMyConnectedSocket(socket)
+            }
+        }
+
+        // Closes the client socket and causes the thread to finish.
+        fun cancel() {
+            try {
+                mmSocket?.close()
+            } catch (e: IOException) {
+                Log.e(TAG, "Could not close the client socket", e)
+            }
+        }
     }
 }

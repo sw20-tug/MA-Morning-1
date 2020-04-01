@@ -3,6 +3,8 @@ package com.example.cheat
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
@@ -15,19 +17,44 @@ class StartActivity : AppCompatActivity() {
     private var bt = BluetoothAdapter.getDefaultAdapter()
     private var list: ArrayList<String> = ArrayList()
     private val conn : BluetoothConnectivity = BluetoothConnectivity(this, bt)
+    private var acceptThread : BluetoothConnectivity.AcceptThread = conn.startAcceptThread()
+    private var connectThread : BluetoothConnectivity.ConnectThread? = null
+    private var discoverable: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
-
-
 
         btnRefresh.setOnClickListener {
             refresh()
         }
 
         btnMakeDiscoverable.setOnClickListener {
-            conn.makeDiscoverable()
+            if (discoverable) {
+                btnMakeDiscoverable.setText("Make discoverable")
+                btnMakeDiscoverable.setBackgroundColor(Color.GREEN)
+                btnMakeDiscoverable.setTextColor(WHITE)
+                if(acceptThread.isAlive) {
+                    acceptThread.cancel()
+                    // Todo: figure out why the thread does not terminate on interrupt here...
+                    // Throws an exception at the moment - but at least we are expecting it...
+                    //connectionThread.interrupt()
+                }
+            }
+            else {
+                btnMakeDiscoverable.setText("Cancel making discoverable")
+                btnMakeDiscoverable.setBackgroundColor(Color.RED)
+                btnMakeDiscoverable.setTextColor(WHITE)
+                conn.makeDiscoverable()
+                acceptThread = conn.startAcceptThread()
+                acceptThread.start()
+            }
+            discoverable = !discoverable
+        }
+
+        btnConnect.setOnClickListener {
+            connectThread = conn.startConnectThread(spinnerFoundBTDevices.selectedItem as String)
+            connectThread!!.start()
         }
 
         val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
