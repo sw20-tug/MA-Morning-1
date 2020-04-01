@@ -1,7 +1,9 @@
 package com.example.cheat
 
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -31,12 +33,17 @@ class ChatActivity : AppCompatActivity() {
             textView.text = text_entry.text;
             text_entry.text = null;
             textView.setTextSize(25f);
-            textView.layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            );
+            textView.setTextColor(getColor(R.color.white));
+            textView.setBackgroundResource(R.drawable.text_view_shape);
 
-            layout?.addView(textView);
+            textView.layoutParams= LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.RIGHT
+                bottomMargin = 10;
+        }
+
+        layout ?.addView(textView);
         }
     }
 
