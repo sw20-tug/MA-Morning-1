@@ -31,7 +31,32 @@
         android:id="@+id/btnMakeDiscoverable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#00FF0A"
         android:text="Make Discoverable"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="152dp" />
+
+    <TextView
+        android:id="@+id/txtSelectCP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Select your cheating partner:"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnConnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="235dp"
+        android:layout_marginRight="235dp"
+        android:text="Connect"
+        app:layout_constraintEnd_toStartOf="@+id/btnRefresh"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerFoundBTDevices" />
 </androidx.constraintlayout.widget.ConstraintLayout>

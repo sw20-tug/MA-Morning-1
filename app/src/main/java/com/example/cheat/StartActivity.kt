@@ -2,13 +2,10 @@ package com.example.cheat
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.graphics.Color
+import android.graphics.Color.WHITE
 import android.os.Bundle
-import android.os.Parcelable
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_start.*
@@ -17,26 +14,12 @@ import org.jetbrains.anko.toast
 class StartActivity : AppCompatActivity() {
 
     private val REQUEST_ENABLE_BT = 1
-
     private var bt = BluetoothAdapter.getDefaultAdapter()
-
     private var list: ArrayList<String> = ArrayList()
-
-    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED == action) {
-                //discovery starts, we can show progress dialog or perform other tasks
-                toast("Starting discovering new devices")
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED == action) {
-                //discovery finishes, dismiss progress dialog
-                toast("Discovery finished")
-            } else if (BluetoothDevice.ACTION_FOUND == action) { //bluetooth device found
-                val device = intent.getParcelableExtra<Parcelable>(BluetoothDevice.EXTRA_DEVICE) as BluetoothDevice
-                list.add(device.name + " (" + device.address + ")")
-            }
-        }
-    }
+    private val conn : BluetoothConnectivity = BluetoothConnectivity(this, bt)
+    private var acceptThread : BluetoothConnectivity.AcceptThread = conn.startAcceptThread()
+    private var connectThread : BluetoothConnectivity.ConnectThread? = null
+    private var discoverable: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,10 +30,31 @@ class StartActivity : AppCompatActivity() {
         }
 
         btnMakeDiscoverable.setOnClickListener {
-            val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-            startActivity(discoverableIntent)
-            //setContentView(R.layout.activity_second)
+            if (discoverable) {
+                btnMakeDiscoverable.setText("Make discoverable")
+                btnMakeDiscoverable.setBackgroundColor(Color.GREEN)
+                btnMakeDiscoverable.setTextColor(WHITE)
+                if(acceptThread.isAlive) {
+                    acceptThread.cancel()
+                    // Todo: figure out why the thread does not terminate on interrupt here...
+                    // Throws an exception at the moment - but at least we are expecting it...
+                    //connectionThread.interrupt()
+                }
+            }
+            else {
+                btnMakeDiscoverable.setText("Cancel making discoverable")
+                btnMakeDiscoverable.setBackgroundColor(Color.RED)
+                btnMakeDiscoverable.setTextColor(WHITE)
+                conn.makeDiscoverable()
+                acceptThread = conn.startAcceptThread()
+                acceptThread.start()
+            }
+            discoverable = !discoverable
+        }
+
+        btnConnect.setOnClickListener {
+            connectThread = conn.startConnectThread(spinnerFoundBTDevices.selectedItem as String)
+            connectThread!!.start()
         }
 
         val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -61,41 +65,15 @@ class StartActivity : AppCompatActivity() {
 
     private fun refresh() {
         list = ArrayList()
-        checkForBondedDevices()
+        list.add("Discovering new devices ...")
         updateSpinner()
-        startDiscovery()
+        list = conn.refresh()
         updateSpinner()
     }
 
     private fun updateSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list)
         spinnerFoundBTDevices.adapter = adapter
-    }
-
-    private fun checkForBondedDevices() {
-        val pairedDevices: Set<BluetoothDevice>? = bt.bondedDevices
-        if (pairedDevices != null) {
-            if (pairedDevices.isNotEmpty()) {
-                pairedDevices?.forEach { device ->
-                    list.add(device.name + " (" + device.address + ")")
-                }
-            }
-            else {
-                toast("No paired devices found on this device...")
-            }
-        }
-    }
-
-    fun startDiscovery() {
-        bt.startDiscovery()
-
-        val filter = IntentFilter()
-
-        filter.addAction(BluetoothDevice.ACTION_FOUND)
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-
-        registerReceiver(receiver, filter)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
