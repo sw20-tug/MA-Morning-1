@@ -29,6 +29,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
+            Log.d(TAG, action)
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED == action) {
                 //discovery starts, we can show progress dialog or perform other tasks
                 Toast.makeText(context, "Starting to discover new devices ...", Toast.LENGTH_SHORT).show()
@@ -77,6 +78,11 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
 
+        try {
+            context.unregisterReceiver(receiver)
+        } catch (e : java.lang.Exception) {
+            //Todo: Do something ... ?
+        }
         context.registerReceiver(receiver, filter)
     }
 
@@ -92,23 +98,22 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         //Toast.makeText(context, "Finished making ourselves discoverable", Toast.LENGTH_SHORT).show()
     }
 
-    fun startAcceptThread(): AcceptThread {
-        return AcceptThread()
+    fun startAcceptThread(activity: StartActivity): AcceptThread {
+        return AcceptThread(activity)
     }
 
-    fun startConnectThread(deviceEntry: String): ConnectThread {
+    fun startConnectThread(deviceEntry: String, activity: StartActivity): ConnectThread {
         val dev : BluetoothDevice? = deviceList[deviceEntry]
         if (dev == null) {
             Log.d(TAG, "Could not connect to the Device " + deviceEntry)
             throw java.lang.Exception("Could not connect to the Device " + deviceEntry)
         }
         else {
-            return ConnectThread(dev)
+            return ConnectThread(dev, activity)
         }
     }
 
-    inner class AcceptThread : Thread() {
-
+    inner class AcceptThread(private val activity: StartActivity) : Thread() {
         private val mmServerSocket: BluetoothServerSocket? by lazy(LazyThreadSafetyMode.NONE) {
             bt?.listenUsingInsecureRfcommWithServiceRecord(serviceName, serviceUUID)
         }
@@ -126,11 +131,27 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 }
                 socket?.also {
                     Log.d(TAG, "connecting to " + it.remoteDevice.name)
-                    //Toast.makeText(context, it.remoteDevice.name + " we want to connect to", Toast.LENGTH_LONG).show()
                     mmServerSocket?.close()
-                    sleep(400000)
                     shouldLoop = false
                     Log.d(TAG, "Finished connecting to " + it.remoteDevice.name)
+                }
+                val inputStream = socket!!.inputStream
+                val outputStream = socket!!.outputStream
+                // Waiting for message to arrive
+                sleep(2000)
+
+                val available = inputStream.available()
+                val bytes = ByteArray(available)
+                inputStream.read(bytes, 0, available)
+                activity.runOnUiThread {
+                    activity.updateText(bytes.toString(Charsets.UTF_8))
+                }
+
+                try {
+                    outputStream.write("Connected :)".toByteArray())
+                    outputStream.flush()
+                } catch(e: Exception) {
+                    Log.e("client", "Cannot send", e)
                 }
             }
         }
@@ -145,7 +166,8 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         }
     }
 
-    inner class ConnectThread(device: BluetoothDevice) : Thread() {
+    inner class ConnectThread(device: BluetoothDevice, activity: StartActivity) : Thread() {
+        private val activity : StartActivity = activity
         private val dev : BluetoothDevice = device
 
         private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
@@ -166,6 +188,27 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 // The connection attempt succeeded. Perform work associated with
                 // the connection in a separate thread.
                 // manageMyConnectedSocket(socket)
+                val outputStream = socket.outputStream
+                val inputStream = socket.inputStream
+                try {
+                    outputStream.write("Connected :)".toByteArray())
+                    outputStream.flush()
+                } catch(e: Exception) {
+                    Log.e("client", "Cannot send", e)
+                } finally {
+                    sleep(4000)
+
+                    val available = inputStream.available()
+                    val bytes = ByteArray(available)
+                    inputStream.read(bytes, 0, available)
+                    activity.runOnUiThread {
+                        activity.updateText(bytes.toString(Charsets.UTF_8))
+                    }
+
+                    outputStream.close()
+                    inputStream.close()
+                    socket.close()
+                }
             }
         }
 
