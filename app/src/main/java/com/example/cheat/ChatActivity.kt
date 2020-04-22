@@ -29,7 +29,7 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var text_entry: EditText;
 
-    lateinit var button_send: ImageButton;
+    lateinit var button_send: Button;
 
     lateinit var layout: LinearLayout;
 
