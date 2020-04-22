@@ -11,19 +11,22 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_start.*
 import org.jetbrains.anko.toast
 
+
 class StartActivity : AppCompatActivity() {
 
     private val REQUEST_ENABLE_BT = 1
     private var bt = BluetoothAdapter.getDefaultAdapter()
     private var list: ArrayList<String> = ArrayList()
     private val conn : BluetoothConnectivity = BluetoothConnectivity(this, bt)
-    private var acceptThread : BluetoothConnectivity.AcceptThread = conn.startAcceptThread()
+    private var acceptThread : BluetoothConnectivity.AcceptThread? = null
     private var connectThread : BluetoothConnectivity.ConnectThread? = null
     private var discoverable: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
+
+        acceptThread = conn.startAcceptThread(this)
 
         btnRefresh.setOnClickListener {
             refresh()
@@ -34,8 +37,8 @@ class StartActivity : AppCompatActivity() {
                 btnMakeDiscoverable.setText("Make discoverable")
                 btnMakeDiscoverable.setBackgroundColor(Color.GREEN)
                 btnMakeDiscoverable.setTextColor(WHITE)
-                if(acceptThread.isAlive) {
-                    acceptThread.cancel()
+                if(acceptThread!!.isAlive) {
+                    acceptThread!!.cancel()
                     // Todo: figure out why the thread does not terminate on interrupt here...
                     // Throws an exception at the moment - but at least we are expecting it...
                     //connectionThread.interrupt()
@@ -46,14 +49,14 @@ class StartActivity : AppCompatActivity() {
                 btnMakeDiscoverable.setBackgroundColor(Color.RED)
                 btnMakeDiscoverable.setTextColor(WHITE)
                 conn.makeDiscoverable()
-                acceptThread = conn.startAcceptThread()
-                acceptThread.start()
+                acceptThread = conn.startAcceptThread(this)
+                acceptThread!!.start()
             }
             discoverable = !discoverable
         }
 
         btnConnect.setOnClickListener {
-            connectThread = conn.startConnectThread(spinnerFoundBTDevices.selectedItem as String)
+            connectThread = conn.startConnectThread(spinnerFoundBTDevices.selectedItem as String, this)
             connectThread!!.start()
         }
 
@@ -74,6 +77,10 @@ class StartActivity : AppCompatActivity() {
     private fun updateSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, list)
         spinnerFoundBTDevices.adapter = adapter
+    }
+
+    fun updateText(text : String) {
+        txtConnected.setText(text)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

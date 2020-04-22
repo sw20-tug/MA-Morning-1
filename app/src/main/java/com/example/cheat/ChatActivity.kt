@@ -88,6 +88,7 @@ class ChatActivity : AppCompatActivity() {
                 gravity = Gravity.RIGHT
                 bottomMargin = 10;
                 topMargin = 10;
+                rightMargin = 15;
             }
 
             layout?.addView(textView);
