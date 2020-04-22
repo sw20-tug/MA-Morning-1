@@ -4,18 +4,13 @@ import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 
+
 import android.os.Bundle
-import android.text.InputType
+
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-
+import android.widget.*
 
 
 import androidx.activity.viewModels
@@ -29,7 +24,7 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var text_entry: EditText;
 
-    lateinit var button_send: Button;
+    lateinit var button_send: ImageButton;
 
     lateinit var layout: LinearLayout;
 
@@ -84,7 +79,7 @@ class ChatActivity : AppCompatActivity() {
             text_entry.text = null;
 
             textView.setTextSize(25f);
-            textView.setTextColor(getColor(R.color.white));
+            textView.setTextColor(Color.WHITE);
             textView.setBackgroundResource(R.drawable.text_view_sent);
 
             textView.layoutParams= LinearLayout.LayoutParams(
