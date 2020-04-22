@@ -43,9 +43,9 @@ class DatabaseTest {
     fun writeUserAndReadInList() {
         val message: Message = Message(0, "test", Date.from(Instant.now()), false)
         messageDao.insertAll(message)
-        val queryResult = messageDao.loadAllMessages()
+        val queryResult = messageDao.loadAllMessages().value
         println(message)
-        assertEquals(queryResult.get(0), message)
+        assertEquals(queryResult!!.get(0), message)
     }
 
 

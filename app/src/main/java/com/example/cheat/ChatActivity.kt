@@ -1,19 +1,27 @@
 package com.example.cheat
 
+import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_chat.*
+
+
+
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 
 
 class ChatActivity : AppCompatActivity() {
+    private val viewModel: MessageViewModel by viewModels()
 
     var debug = true;   // just for debugging
 
@@ -63,6 +71,7 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(debug) println("sendMessage");
@@ -102,6 +111,4 @@ class ChatActivity : AppCompatActivity() {
         button_send = findViewById(R.id.button_send);
         loadHistory();
     }
-
-
 }
