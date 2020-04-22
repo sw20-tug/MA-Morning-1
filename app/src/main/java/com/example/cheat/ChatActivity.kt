@@ -1,9 +1,12 @@
 package com.example.cheat
 
+import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 
 import android.os.Bundle
+import android.text.InputType
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 
@@ -52,8 +55,8 @@ class ChatActivity : AppCompatActivity() {
                 i++;
 
                 textView.setTextSize(25f);
-                textView.setTextColor(getColor(R.color.white));
-                textView.setBackgroundResource(R.drawable.text_view_shape);
+                textView.setTextColor(Color.BLACK);
+                textView.setBackgroundResource(R.drawable.text_view_received);
 
                 textView.layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -82,7 +85,7 @@ class ChatActivity : AppCompatActivity() {
 
             textView.setTextSize(25f);
             textView.setTextColor(getColor(R.color.white));
-            textView.setBackgroundResource(R.drawable.text_view_shape);
+            textView.setBackgroundResource(R.drawable.text_view_sent);
 
             textView.layoutParams= LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,

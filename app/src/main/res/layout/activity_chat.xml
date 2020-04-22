@@ -43,6 +43,8 @@
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
         android:layout_above="@+id/linearLayout2"
         android:scrollbarStyle="insideOverlay"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -100,7 +102,7 @@
             android:layout_weight="2"
             android:ems="10"
             android:hint="@string/text_entry"
-            android:inputType="text"
+            android:inputType="textVisiblePassword"
             android:paddingHorizontal="10dp"
             android:text="" />
 
