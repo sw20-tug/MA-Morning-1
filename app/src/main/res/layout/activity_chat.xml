@@ -7,42 +7,14 @@
     android:background="#749DAF"
     tools:context=".ChatActivity">
 
-    <EditText
-        android:id="@+id/text_entry"
-        android:layout_width="0dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="#FFFFFF"
-        android:ellipsize="none"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="@string/text_entry"
-        app:layout_constraintBottom_toTopOf="@+id/button_send"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.47"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/button_send"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="sendMessage"
-        android:text="@string/button_send"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
         android:layout_above="@+id/linearLayout2"
         android:scrollbarStyle="insideOverlay"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -51,7 +23,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/linearLayout2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.224">
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:id="@+id/history_layout"
@@ -100,7 +72,7 @@
             android:layout_weight="2"
             android:ems="10"
             android:hint="@string/text_entry"
-            android:inputType="text"
+            android:inputType="textVisiblePassword"
             android:paddingHorizontal="10dp"
             android:text="" />
 
