@@ -126,7 +126,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 }
                 socket?.also {
                     Log.d(TAG, "connecting to " + it.remoteDevice.name)
-                    Toast.makeText(context, it.remoteDevice.name + " we want to connect to", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(context, it.remoteDevice.name + " we want to connect to", Toast.LENGTH_LONG).show()
                     mmServerSocket?.close()
                     sleep(400000)
                     shouldLoop = false
@@ -162,8 +162,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 Log.d(TAG, "Starting connecting to " + dev.name)
                 socket.connect()
                 Log.d(TAG, "Finished connecting to " + dev.name)
-                Toast.makeText(context, "I connected to " + dev.name, Toast.LENGTH_LONG)
-
+                //Toast.makeText(context, "I connected to " + dev.name, Toast.LENGTH_LONG)
                 // The connection attempt succeeded. Perform work associated with
                 // the connection in a separate thread.
                 // manageMyConnectedSocket(socket)

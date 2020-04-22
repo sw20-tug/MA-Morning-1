@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 
@@ -27,7 +26,7 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var text_entry: EditText;
 
-    lateinit var button_send: ImageButton;
+    lateinit var button_send: Button;
 
     lateinit var layout: LinearLayout;
 
