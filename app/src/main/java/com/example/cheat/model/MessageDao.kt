@@ -1,12 +1,13 @@
 package com.example.cheat.model
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 
 @Dao
 interface MessageDao {
     @Query("SELECT * FROM Message")
-    fun loadAllMessages(): Array<Message>
+    fun loadAllMessages(): LiveData<List<Message>>
 
     @Insert
     fun insertAll(vararg messages: Message)
