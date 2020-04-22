@@ -1,13 +1,17 @@
 package com.example.cheat
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 
 class ChatActivity : AppCompatActivity() {
+    private val viewModel: MessageViewModel by viewModels()
 
     lateinit var text_entry: EditText;
 
@@ -25,6 +29,7 @@ class ChatActivity : AppCompatActivity() {
         // TODO open and use camera
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()) { // not sending empty text
@@ -59,6 +64,4 @@ class ChatActivity : AppCompatActivity() {
         button_send = findViewById(R.id.button_send);
 
     }
-
-
 }
