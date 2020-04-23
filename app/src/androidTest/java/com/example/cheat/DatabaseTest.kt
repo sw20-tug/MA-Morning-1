@@ -1,22 +1,21 @@
 package com.example.cheat
-
 import android.content.Context
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.cheat.model.AppDatabase
 import com.example.cheat.model.Message
 import com.example.cheat.model.MessageDao
-import org.hamcrest.CoreMatchers.equalTo
+import com.jraska.livedata.test
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.*
 
 @RunWith(AndroidJUnit4::class)
@@ -38,15 +37,19 @@ class DatabaseTest {
         db.close()
     }
 
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
+
     @Test
     @Throws(Exception::class)
     fun writeUserAndReadInList() {
         val message: Message = Message(0, "test", Date.from(Instant.now()), false)
         messageDao.insertAll(message)
-        val queryResult = messageDao.loadAllMessages().value
+        val queryResult : LiveData<List<Message>> = messageDao.loadAllMessages()
         println(message)
-        assertEquals(queryResult!!.get(0), message)
+        queryResult.test()
+            .awaitValue()
+            .assertHasValue()
+            .assertValue{it!!.get(0) == message }
     }
-
-
 }
