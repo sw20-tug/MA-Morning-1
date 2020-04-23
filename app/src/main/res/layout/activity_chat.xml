@@ -10,9 +10,14 @@
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="511dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:layout_above="@+id/linearLayout2"
         android:scrollbarStyle="insideOverlay"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout2"
         app:layout_constraintHorizontal_bias="0.0"
@@ -21,7 +26,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
-            android:id="@+id/history"
+            android:id="@+id/history_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
@@ -32,7 +37,7 @@
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_height="45dp"
         android:background="#fff"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -62,12 +67,12 @@
 
         <EditText
             android:id="@+id/text_entry"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:ems="10"
-            android:hint="Write a message"
-            android:inputType="text"
+            android:hint="@string/text_entry"
+            android:inputType="textVisiblePassword"
             android:paddingHorizontal="10dp"
             android:text="" />
 
@@ -80,32 +85,6 @@
             android:onClick="sendMessage"
             android:padding="20dp"
             app:srcCompat="@drawable/ic_send" />
-
-
-        <!--        <Button-->
-        <!--            android:id="@+id/button_send"-->
-        <!--            android:layout_width="179dp"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:onClick="sendMessage"-->
-        <!--            android:text="@string/button_send"-->
-        <!--            app:layout_constraintStart_toEndOf="@+id/text_entry" />-->
-
-        <!--        <EditText-->
-        <!--            android:id="@+id/text_entry"-->
-        <!--            android:layout_width="246dp"-->
-        <!--            android:layout_height="56dp"-->
-        <!--            android:background="#FFFFFF"-->
-        <!--            android:ellipsize="none"-->
-        <!--            android:ems="10"-->
-        <!--            android:inputType="textPersonName"-->
-        <!--            android:text="@string/text_entry"-->
-        <!--            tools:layout_editor_absoluteX="23dp"-->
-        <!--            tools:layout_editor_absoluteY="613dp" />-->
-        <!--        <TextView-->
-        <!--            android:id="@+id/textView"-->
-        <!--            android:layout_width="319dp"-->
-        <!--            android:layout_height="104dp"-->
-        <!--            android:text="TextView" />-->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
