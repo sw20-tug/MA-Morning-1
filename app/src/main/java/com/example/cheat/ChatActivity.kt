@@ -1,28 +1,27 @@
 package com.example.cheat
 
-
-import android.Manifest.permission.CAMERA
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
+import androidx.appcompat.app.AppCompatActivity
+
+
 import android.os.Bundle
+
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+
+
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_start.*
 
 
 class ChatActivity : AppCompatActivity() {
 
     private val viewModel: MessageViewModel by viewModels()
-    private val PERMISSION_CODE = 1000;
-    //private val IMAGE_CAPTURE_CODE = 1001;
 
     var debug = true;   // just for debugging
 
@@ -34,27 +33,9 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var history: ScrollView;
 
-    fun requestCamera(view: View) {
-        val i = Intent(applicationContext, CameraActivity::class.java)
-        startActivity(i)
-        setContentView(R.layout.activity_camera)
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if(checkSelfPermission(CAMERA)
-                == PackageManager.PERMISSION_DENIED ||
-                checkSelfPermission(WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_DENIED) {
-                // permission not enabled
-                val permission = arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE);
-                requestPermissions(permission, PERMISSION_CODE)
-            } else {
-                // permission granted
-                CameraActivity.openCamera();
-            }
-        } else {
-            // system os is < marshmallow
-            CameraActivity.openCamera();
-        }
+    fun openCamera(view: View) {
+        // TODO open and use camera
+        if(debug) println("openCamera");
     }
 
     fun openImages(view: View) {
