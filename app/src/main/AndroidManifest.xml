@@ -12,7 +12,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StartActivity"
+        <activity
+            android:name=".CameraActivity"
+            android:label="@string/title_activity_camera"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".StartActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
         <activity android:name=".ChatActivity"

@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@android:color/white"
-            android:onClick="openCamera"
+            android:onClick="requestCamera"
             android:padding="20dp"
             app:srcCompat="@drawable/ic_camera" />
 
