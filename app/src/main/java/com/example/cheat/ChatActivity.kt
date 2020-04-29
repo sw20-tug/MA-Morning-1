@@ -1,22 +1,18 @@
 package com.example.cheat
 
+
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
-
-
 import android.os.Bundle
-
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-
-
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import kotlinx.android.synthetic.main.activity_start.*
+import androidx.appcompat.app.AppCompatActivity
+import com.example.camdummy.CameraActivity
 
 
 class ChatActivity : AppCompatActivity() {
@@ -33,9 +29,12 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var history: ScrollView;
 
-    fun openCamera(view: View) {
-        // TODO open and use camera
+    fun requestCamera(view: View) {
         if(debug) println("openCamera");
+
+        val i = Intent(getApplicationContext(), CameraActivity::class.java)
+        startActivity(i)
+        setContentView(R.layout.activity_camera)
     }
 
     fun openImages(view: View) {
