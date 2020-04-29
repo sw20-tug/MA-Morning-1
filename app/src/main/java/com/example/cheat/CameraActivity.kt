@@ -24,7 +24,7 @@ import java.io.IOException
 import java.util.*
 
 
-class MainActivity : AppCompatActivity() {
+class CameraActivity : AppCompatActivity() {
 
     private val PERMISSION_CODE = 1000;
     private val IMAGE_CAPTURE_CODE = 1001;
@@ -33,26 +33,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_camera)
 
-        capture_btn.setOnClickListener {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if(checkSelfPermission(CAMERA)
-                    == PackageManager.PERMISSION_DENIED ||
-                    checkSelfPermission(WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_DENIED) {
-                    // permission not enabled
-                    val permission = arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE);
-                    requestPermissions(permission, PERMISSION_CODE)
-                }
-                else {
-                    // permission granted
-                    openCamera();
-                }
-            } else {
-                // system os is < marshmallow
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(checkSelfPermission(CAMERA)
+                == PackageManager.PERMISSION_DENIED ||
+                checkSelfPermission(WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_DENIED) {
+                // permission not enabled
+                val permission = arrayOf(CAMERA, WRITE_EXTERNAL_STORAGE);
+                requestPermissions(permission, PERMISSION_CODE)
+            }
+            else {
+                // permission granted
                 openCamera();
             }
+        } else {
+            // system os is < marshmallow
+            openCamera();
         }
     }
 
