@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    tools:context=".CameraActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/image_box"
+        android:scaleType="centerCrop"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        />
+
+    <!-- image set-->
+    <ImageView
+        android:id="@+id/image_view"
+        android:src="@drawable/ic_image_black_24dp"
+        android:scaleType="centerCrop"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        />
+
+    <!-- open camera button -->
+    <Button
+        android:id="@+id/capture_btn"
+        android:text="Capture Image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+</LinearLayout>
