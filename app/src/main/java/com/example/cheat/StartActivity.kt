@@ -28,6 +28,10 @@ class StartActivity : AppCompatActivity() {
 
         acceptThread = conn.startAcceptThread(this)
 
+        btnDebug.setOnClickListener {
+            startActivity(Intent(this,ChatActivity::class.java))
+        }
+
         btnRefresh.setOnClickListener {
             refresh()
         }
