@@ -1,5 +1,6 @@
 package com.example.cheat
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +16,11 @@ import android.widget.*
 
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import kotlinx.android.synthetic.main.activity_start.*
 
 
 class ChatActivity : AppCompatActivity() {
+
     private val viewModel: MessageViewModel by viewModels()
 
     var debug = true;   // just for debugging
@@ -100,6 +103,10 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        btnDebug.setOnClickListener {
+            startActivity(Intent(this,StartActivity::class.java))
+        }
 
         if(debug) println("onCreate");
 
