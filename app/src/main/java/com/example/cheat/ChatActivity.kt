@@ -35,7 +35,7 @@ class ChatActivity : AppCompatActivity() {
     fun requestCamera(view: View) {
         val i = Intent(applicationContext, CameraActivity::class.java)
         startActivity(i)
-        setContentView(R.layout.activity_camera2)
+        setContentView(R.layout.activity_camera)
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if(checkSelfPermission(CAMERA)
