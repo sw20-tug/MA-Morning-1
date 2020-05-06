@@ -35,12 +35,9 @@ jobs:
         with:
           java-version: 1.8
       - name: Gradle Build
-        run: ./gradlew build
-      - name: Upload build
-        uses: actions/upload-artifact@v2
+      - uses: eskatos/gradle-command-action@v1
         with:
-          name: Build Result
-          path: app/build/
+          arguments: build
 
       
   apk:
