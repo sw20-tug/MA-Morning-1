@@ -2,6 +2,7 @@ package com.example.cheat
 
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
@@ -18,8 +19,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.example.cheat.R
 import kotlinx.android.synthetic.main.activity_camera.*
+//import sun.jvm.hotspot.utilities.IntArray
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -64,6 +65,9 @@ class CameraActivity : AppCompatActivity() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
+
+        MediaStore.Images.Media.insertImage(contentResolver, image_uri.toString(),
+                                    "", "")
     }
 
     fun returnToChatActivity(view: View)  {
