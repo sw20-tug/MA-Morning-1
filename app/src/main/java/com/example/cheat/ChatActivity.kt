@@ -1,23 +1,23 @@
 package com.example.cheat
 
+
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
-
-
 import android.os.Bundle
-
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-
-
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import com.example.cheat.CameraActivity
+import kotlinx.android.synthetic.main.activity_chat.*
 
 
 class ChatActivity : AppCompatActivity() {
+
     private val viewModel: MessageViewModel by viewModels()
 
     var debug = true;   // just for debugging
@@ -30,9 +30,12 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var history: ScrollView;
 
-    fun openCamera(view: View) {
-        // TODO open and use camera
-        if(debug) println("openCamera");
+    fun requestCamera(view: View) {
+        if(debug) println("requestCamera");
+
+        val i = Intent(getApplicationContext(), CameraActivity::class.java)
+        startActivity(i)
+        setContentView(R.layout.activity_camera)
     }
 
     fun openImages(view: View) {
@@ -100,6 +103,10 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+
+        btnDebug.setOnClickListener {
+            startActivity(Intent(this,StartActivity::class.java))
+        }
 
         if(debug) println("onCreate");
 
