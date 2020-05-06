@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -46,15 +47,15 @@ class CameraActivity : AppCompatActivity() {
             }
             else {
                 // permission granted
-                openCamera();
+                openCamera(null);
             }
         } else {
             // system os is < marshmallow
-            openCamera();
+            openCamera(null);
         }
     }
 
-    private fun openCamera() {
+    public fun openCamera(view: View?)  {
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "New Picture")
         values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
@@ -65,13 +66,17 @@ class CameraActivity : AppCompatActivity() {
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
     }
 
+    fun returnToChatActivity(view: View)  {
+        finish()
+    }
+    
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when(requestCode) {
             PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission from popup granted
-                    openCamera();
+                    openCamera(null);
                 } else {
                     // permission from popup denied
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()

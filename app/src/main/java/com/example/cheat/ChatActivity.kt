@@ -35,7 +35,7 @@ class ChatActivity : AppCompatActivity() {
 
         val i = Intent(getApplicationContext(), CameraActivity::class.java)
         startActivity(i)
-        setContentView(R.layout.activity_camera)
+        //setContentView(R.layout.activity_camera)
     }
 
     fun openImages(view: View) {
