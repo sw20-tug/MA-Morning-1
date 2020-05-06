@@ -12,7 +12,8 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import com.example.camdummy.CameraActivity
+import com.example.cheat.CameraActivity
+import kotlinx.android.synthetic.main.activity_chat.*
 
 
 class ChatActivity : AppCompatActivity() {
@@ -30,7 +31,7 @@ class ChatActivity : AppCompatActivity() {
     lateinit var history: ScrollView;
 
     fun requestCamera(view: View) {
-        if(debug) println("openCamera");
+        if(debug) println("requestCamera");
 
         val i = Intent(getApplicationContext(), CameraActivity::class.java)
         startActivity(i)
