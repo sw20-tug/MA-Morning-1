@@ -17,6 +17,9 @@
         <activity android:name=".StartActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
+        <activity android:name=".CameraActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+        </activity>
         <activity android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
