@@ -4,32 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context=".ChatActivity">
 
     <LinearLayout
-        android:orientation="vertical"
         android:id="@+id/image_box"
-        android:scaleType="centerCrop"
         android:layout_width="400dp"
         android:layout_height="400dp"
-        />
+        android:orientation="vertical"
+        android:scaleType="centerCrop" />
 
     <!-- image set-->
     <ImageView
         android:id="@+id/image_view"
-        android:src="@drawable/ic_image_black_24dp"
-        android:scaleType="centerCrop"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        />
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_image_black_24dp" />
 
     <!-- open camera button -->
     <Button
-        android:id="@+id/capture_btn"
-        android:text="Capture Image"
-        android:layout_width="match_parent"
+        android:id="@+id/open_camera_btn"
+        android:layout_width="147dp"
         android:layout_height="wrap_content"
-        />
+        android:onClick="openCamera"
+        android:text="Open Camera" />
+
+    <!-- return button -->
+    <Button
+        android:id="@+id/return_btn"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:onClick="returnToChatActivity"
+        android:text="Return to chat" />
+
+
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.example.cheat
 
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.R.attr.bitmap
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
@@ -12,13 +13,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.example.cheat.R
 import kotlinx.android.synthetic.main.activity_camera.*
+//import sun.jvm.hotspot.utilities.IntArray
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -46,15 +48,15 @@ class CameraActivity : AppCompatActivity() {
             }
             else {
                 // permission granted
-                openCamera();
+                openCamera(null);
             }
         } else {
             // system os is < marshmallow
-            openCamera();
+            openCamera(null);
         }
     }
 
-    private fun openCamera() {
+    public fun openCamera(view: View?)  {
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "New Picture")
         values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
@@ -63,15 +65,22 @@ class CameraActivity : AppCompatActivity() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
+
+        MediaStore.Images.Media.insertImage(contentResolver, image_uri.toString(),
+                                    "", "")
     }
 
+    fun returnToChatActivity(view: View)  {
+        finish()
+    }
+    
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when(requestCode) {
             PERMISSION_CODE -> {
                 if (grantResults.isNotEmpty() &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission from popup granted
-                    openCamera();
+                    openCamera(null);
                 } else {
                     // permission from popup denied
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
