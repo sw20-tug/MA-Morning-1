@@ -17,7 +17,7 @@ class StartActivity : AppCompatActivity() {
     private val REQUEST_ENABLE_BT = 1
     private var bt = BluetoothAdapter.getDefaultAdapter()
     private var list: ArrayList<String> = ArrayList()
-    private val conn : BluetoothConnectivity = BluetoothConnectivity(this, bt)
+    private var conn : BluetoothConnectivity? = null
     private var acceptThread : BluetoothConnectivity.AcceptThread? = null
     private var connectThread : BluetoothConnectivity.ConnectThread? = null
     private var discoverable: Boolean = false
@@ -26,11 +26,9 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        acceptThread = conn.startAcceptThread(this)
+        conn = BluetoothConnectivity.Companion.instance(this, bt)
 
-        btnDebug.setOnClickListener {
-            startActivity(Intent(this,ChatActivity::class.java))
-        }
+        acceptThread = conn!!.startAcceptThread(this)
 
         btnRefresh.setOnClickListener {
             refresh()
@@ -52,15 +50,15 @@ class StartActivity : AppCompatActivity() {
                 btnMakeDiscoverable.setText("Cancel making discoverable")
                 btnMakeDiscoverable.setBackgroundColor(Color.RED)
                 btnMakeDiscoverable.setTextColor(WHITE)
-                conn.makeDiscoverable()
-                acceptThread = conn.startAcceptThread(this)
+                conn!!.makeDiscoverable()
+                acceptThread = conn!!.startAcceptThread(this)
                 acceptThread!!.start()
             }
             discoverable = !discoverable
         }
 
         btnConnect.setOnClickListener {
-            connectThread = conn.startConnectThread(spinnerFoundBTDevices.selectedItem as String, this)
+            connectThread = conn!!.startConnectThread(spinnerFoundBTDevices.selectedItem as String, this)
             connectThread!!.start()
         }
 
@@ -70,11 +68,16 @@ class StartActivity : AppCompatActivity() {
         refresh()
     }
 
+    public fun changeToChatActivity() {
+        val intent = Intent(this,ChatActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun refresh() {
         list = ArrayList()
         list.add("Discovering new devices ...")
         updateSpinner()
-        list = conn.refresh()
+        list = conn!!.refresh()
         updateSpinner()
     }
 

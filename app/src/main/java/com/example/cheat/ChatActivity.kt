@@ -2,14 +2,15 @@ package com.example.cheat
 
 
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Debug
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -17,16 +18,17 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_chat.*
 import androidx.lifecycle.Observer
-import com.example.cheat.CameraActivity
 import com.example.cheat.model.Message
+import android.content.ContentValues.TAG
 import java.util.*
 
 
 class ChatActivity : AppCompatActivity() {
 
     private val viewModel: MessageViewModel by viewModels()
+
+    private var bt : BluetoothConnectivity = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
 
     var debug = true;   // just for debugging
 
@@ -89,11 +91,20 @@ class ChatActivity : AppCompatActivity() {
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()){
+            bt.writeMessage(text_entry.text.toString() + "\\0")
             var message = Message(nextUid, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
             text_entry.text = null;
             nextUid++
         }
+    }
+
+    fun receiveMessage(messageString : String) {
+        // TODO: Check the Date functionality - maybe get that from the sender device?
+        Log.d(TAG, "test12")
+        var message = Message(nextUid, messageString, Date(), false)
+        viewModel.insertMessage(message)
+        nextUid++
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -106,6 +117,8 @@ class ChatActivity : AppCompatActivity() {
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri);
+            imageView.maxHeight = 400;
+            imageView.minimumHeight = 400;
 
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
@@ -117,11 +130,10 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
-        viewModel.deleteAllMessage()
+        bt.updateContext(this)
+        bt.setChatActivity(this)
 
-        btnDebug.setOnClickListener {
-            startActivity(Intent(this,StartActivity::class.java))
-        }
+        viewModel.deleteAllMessage()
 
         if(debug) println("onCreate");
 
@@ -129,6 +141,7 @@ class ChatActivity : AppCompatActivity() {
             layout.removeAllViews()
             for (message in it) {
                 val textView = TextView(this);
+                textView.id = message.uid
                 textView.text = message.text;
                 textView.setTextSize(25f);
                 if (message.belongsToCurrentUser){
