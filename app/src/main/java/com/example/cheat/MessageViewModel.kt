@@ -27,4 +27,8 @@ class MessageViewModel(application: Application): AndroidViewModel(application) 
     fun deleteMessage(message: Message) {
         viewModelScope.launch { repository.deleteMessage(message) }
     }
+
+    fun deleteAllMessage() {
+        viewModelScope.launch { repository.deleteAllMessage() }
+    }
 }
