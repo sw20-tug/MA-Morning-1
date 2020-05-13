@@ -25,6 +25,10 @@ class Repository(context: Context) {
         deleteMessageAsync(message)
     }
 
+    suspend fun deleteAllMessage() {
+        deleteAllMessageAsync()
+    }
+
     private suspend fun insertMessageAsync(message: Message) {
         withContext(Dispatchers.IO) {
             messageDao.insertAll(message)
@@ -40,6 +44,12 @@ class Repository(context: Context) {
     private suspend fun deleteMessageAsync(message: Message) {
         withContext(Dispatchers.IO) {
             messageDao.delete(message)
+        }
+    }
+
+    private suspend fun deleteAllMessageAsync() {
+        withContext(Dispatchers.IO) {
+            messageDao.deleteAllMessage()
         }
     }
 }
