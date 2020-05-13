@@ -106,6 +106,8 @@ class ChatActivity : AppCompatActivity() {
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri);
+            imageView.maxHeight = 400;
+            imageView.minimumHeight = 400;
 
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
