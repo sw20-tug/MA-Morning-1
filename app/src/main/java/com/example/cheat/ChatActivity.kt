@@ -101,15 +101,6 @@ class ChatActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
             val imageUri: Uri? = data!!.data
-            println(imageUri);
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        // called when img captured from camera intent
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            // set image captured to image view
-            val imageUri: Uri? = data!!.data
             val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
 
             val imageView = ImageView(this);
@@ -119,12 +110,6 @@ class ChatActivity : AppCompatActivity() {
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
         }
-    }
-
-
-    private fun getPowerOfTwoForSampleRatio(ratio: Double): Int {
-        val k = Integer.highestOneBit(floor(ratio).toInt())
-        return if (k == 0) 1 else k
     }
 
 
