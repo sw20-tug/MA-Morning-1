@@ -65,6 +65,8 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
+        viewModel.deleteAllMessage()
+
         btnDebug.setOnClickListener {
             startActivity(Intent(this,StartActivity::class.java))
         }
