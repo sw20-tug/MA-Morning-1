@@ -28,7 +28,8 @@ class ChatActivity : AppCompatActivity() {
 
     private val viewModel: MessageViewModel by viewModels()
 
-    private var bt : BluetoothConnectivity = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
+    private lateinit var bt : BluetoothConnectivity
+    private var btEnabled : Boolean = false
 
     var debug = true;   // just for debugging
 
@@ -91,7 +92,9 @@ class ChatActivity : AppCompatActivity() {
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()){
-            bt.writeMessage(text_entry.text.toString() + "\\0")
+            if (btEnabled){
+                bt.writeMessage(text_entry.text.toString() + "\\0")
+            }
             var message = Message(nextUid, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
             text_entry.text = null;
@@ -129,9 +132,13 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-
-        bt.updateContext(this)
-        bt.setChatActivity(this)
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
+            btEnabled = true
+            bt =
+                BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
+            bt.updateContext(this)
+            bt.setChatActivity(this)
+        }
 
         viewModel.deleteAllMessage()
 
