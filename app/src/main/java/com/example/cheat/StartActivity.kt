@@ -29,6 +29,7 @@ class StartActivity : AppCompatActivity() {
         conn = BluetoothConnectivity.Companion.instance(this, bt)
 
         acceptThread = conn!!.startAcceptThread(this)
+        acceptThread!!.start()
 
         btnRefresh.setOnClickListener {
             refresh()
@@ -39,20 +40,17 @@ class StartActivity : AppCompatActivity() {
                 btnMakeDiscoverable.setText("Make discoverable")
                 btnMakeDiscoverable.setBackgroundColor(Color.GREEN)
                 btnMakeDiscoverable.setTextColor(WHITE)
-                if(acceptThread!!.isAlive) {
-                    acceptThread!!.cancel()
-                    // Todo: figure out why the thread does not terminate on interrupt here...
-                    // Throws an exception at the moment - but at least we are expecting it...
-                    //connectionThread.interrupt()
-                }
             }
             else {
                 btnMakeDiscoverable.setText("Cancel making discoverable")
                 btnMakeDiscoverable.setBackgroundColor(Color.RED)
                 btnMakeDiscoverable.setTextColor(WHITE)
                 conn!!.makeDiscoverable()
-                acceptThread = conn!!.startAcceptThread(this)
-                acceptThread!!.start()
+                if (!acceptThread!!.isAlive) {
+                    // just in case that the thread was killed for whatever reason
+                    acceptThread = conn!!.startAcceptThread(this)
+                    acceptThread!!.start()
+                }
             }
             discoverable = !discoverable
         }
