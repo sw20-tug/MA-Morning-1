@@ -1,14 +1,13 @@
 package com.example.cheat
 
-
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Debug
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -20,7 +19,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
-import android.content.ContentValues.TAG
 import java.util.*
 
 
@@ -58,34 +56,6 @@ class ChatActivity : AppCompatActivity() {
         // save image to local variable
         // encode it.
         // send to BT for transmission
-    }
-
-    fun loadHistory() {
-        if(debug) {
-            println("sendMessage");
-            var i = 0;
-            while(i < 15) {
-                val textView = TextView(this);
-                textView.text = "Message$i";
-                i++;
-
-                textView.setTextSize(25f);
-                textView.setTextColor(Color.BLACK);
-                textView.setBackgroundResource(R.drawable.text_view_received);
-
-                textView.layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    gravity = Gravity.LEFT
-                    bottomMargin = 10;
-                    topMargin = 10;
-                }
-
-                layout?.addView(textView);
-            }
-            history.post { history.fullScroll(View.FOCUS_DOWN) }
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -134,8 +104,7 @@ class ChatActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chat)
         if (BluetoothAdapter.getDefaultAdapter() != null) {
             btEnabled = true
-            bt =
-                BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
+            bt = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
             bt.updateContext(this)
             bt.setChatActivity(this)
         }
@@ -181,7 +150,7 @@ class ChatActivity : AppCompatActivity() {
             history.post { history.fullScroll(View.FOCUS_DOWN) }
         })
 
-        history = findViewById<ScrollView>(R.id.scrollView);
+        history = findViewById(R.id.scrollView);
         layout = findViewById(R.id.history_layout);
         text_entry = findViewById(R.id.text_entry);
         button_send = findViewById(R.id.button_send);
