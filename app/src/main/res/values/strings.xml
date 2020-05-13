@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CHEAT</string>
+    <string name="text_entry">Enter a message</string>
+    <string name="button_send">Send</string>
+</resources>
