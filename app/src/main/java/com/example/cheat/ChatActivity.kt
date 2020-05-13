@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,10 +18,12 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import kotlinx.android.synthetic.main.activity_chat.*
 import androidx.lifecycle.Observer
 import com.example.cheat.CameraActivity
 import com.example.cheat.model.Message
+import java.io.File
 import java.util.*
 
 
@@ -105,7 +108,9 @@ class ChatActivity : AppCompatActivity() {
 
             val imageView = ImageView(this);
 
-            imageView.setImageURI(imageUri);
+            imageView.setImageURI(imageUri)
+
+            imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
             imageView.maxHeight = 400;
             imageView.minimumHeight = 400;
 
@@ -114,6 +119,14 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    fun onImageClick(photoUri: Uri) {
+        val imageView = findViewById<ImageView>(R.id.fullScreenView);
+        imageView.visibility = View.VISIBLE;
+        val backgroundView = findViewById<ImageView>(R.id.fullScreenBackground);
+        backgroundView.visibility = View.VISIBLE;
+        imageView.setImageURI(photoUri)
+        imageView.setOnClickListener() {v -> imageView.visibility = View.GONE; backgroundView.visibility = View.GONE}
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
