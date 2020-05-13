@@ -19,8 +19,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
-    private val context : Context = cnt
+class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
+    private var context : Context = cnt
     private val bt : BluetoothAdapter = blt
     private var list: ArrayList<String> = ArrayList()
     private var deviceList : HashMap<String, BluetoothDevice> = HashMap()
@@ -29,6 +29,8 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
     private val serviceUUID: UUID = UUID.fromString("0b538899-008d-40ed-a0dc-6e657c3be729")
 
     private var connectedThread : ConnectedThread? = null;
+
+    private var chatActivity : ChatActivity? = null;
 
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -47,6 +49,25 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                 deviceList[listEntry] = device
             }
         }
+    }
+
+    companion object {
+        private var connectivity : BluetoothConnectivity? = null;
+
+        fun instance(ctx : Context, bt : BluetoothAdapter) : BluetoothConnectivity {
+            if (connectivity == null) {
+                connectivity = BluetoothConnectivity(ctx, bt)
+            }
+            return connectivity!!
+        }
+    }
+
+    fun updateContext(new_context : Context) {
+        context = new_context
+    }
+
+    fun setChatActivity(chatActivity_: ChatActivity) {
+        chatActivity = chatActivity_
     }
 
     fun refresh(): ArrayList<String> {
@@ -99,7 +120,6 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         } catch (e: Exception) {
             Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
         }
-        //Toast.makeText(context, "Finished making ourselves discoverable", Toast.LENGTH_SHORT).show()
     }
 
     fun startAcceptThread(activity: StartActivity): AcceptThread {
@@ -158,10 +178,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                     shouldLoop = false;
                     Log.d(TAG, "Finished connecting to " + it.remoteDevice.name);
                     manageMyConnectedThread(it);
+                    activity.changeToChatActivity()
                     while (true) {
-                        writeMessage("Hello darkness my old friend.\\0");
-                        sleep(500);
-                        writeMessage("something positive :)\\0");
+                        // Needs to be here as the thread is killed otherwise and we can't receive or send messages then
                     }
                 }
             }
@@ -195,10 +214,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                     manageMyConnectedThread(socket);
                     Log.d(TAG, "Finished connecting to " + dev.name);
                 }
-                while(true) {
-                    writeMessage("This is a really really really really really really really really really really really really really really really really really really long message that we should still get on the other device.\\0");
-                    sleep(500);
-                    writeMessage("I've come to talk with you again.\\0")
+                activity.changeToChatActivity()
+                while (true) {
+                    // Needs to be here as the thread is killed otherwise and we can't receive or send messages then
                 }
             }
         }
@@ -231,9 +249,6 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
         public override fun run() {
             // Todo: Remove the endless loop with an actual check
             while (true) {
-                if (!socket.isConnected) {
-                    Log.d(TAG, "YOU fucking lil shit!");
-                }
                 val available = input.available();
                 if (available != 0) {
                     val bytes = ByteArray(available);
@@ -241,10 +256,10 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter) {
                     val stringFromBytes = String(bytes, 0, available);
                     currentReceivedMessage += stringFromBytes;
                     if (stringFromBytes.contains("\\0")) {  // Message is finished
-                        // TODO: Handler do the database update
+                        currentReceivedMessage = currentReceivedMessage.replace("\\0", "")
+                        chatActivity!!.receiveMessage(currentReceivedMessage)
                         currentReceivedMessage = "";
                         Log.d(TAG, "Bluetooth-Read: This is what we received - " + stringFromBytes);
-                        //break;
                     }
                 }
             }
