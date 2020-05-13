@@ -18,10 +18,10 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_chat.*
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-import kotlin.math.floor
+import androidx.lifecycle.Observer
+import com.example.cheat.CameraActivity
+import com.example.cheat.model.Message
+import java.util.*
 
 
 class ChatActivity : AppCompatActivity() {
@@ -37,6 +37,8 @@ class ChatActivity : AppCompatActivity() {
     lateinit var layout: LinearLayout;
 
     lateinit var history: ScrollView;
+
+    var nextUid: Int = 0;
 
     fun requestCamera(view: View) {
         if(debug) println("requestCamera");
@@ -86,28 +88,20 @@ class ChatActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     fun sendMessage(view: View) {
 //         Do something in response to button click
-        if(debug) println("sendMessage");
-
-        if(!text_entry.text.isBlank()) { // not sending empty text
-            val textView = TextView(this);
-            textView.text = text_entry.text;
+        if(!text_entry.text.isBlank()){
+            var message = Message(nextUid, text_entry.text.toString(), Date(), true)
+            viewModel.insertMessage(message)
             text_entry.text = null;
+            nextUid++
+        }
+    }
 
-            textView.setTextSize(25f);
-            textView.setTextColor(Color.WHITE);
-            textView.setBackgroundResource(R.drawable.text_view_sent);
-
-            textView.layoutParams= LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                gravity = Gravity.RIGHT
-                bottomMargin = 10;
-                topMargin = 10;
-                rightMargin = 15;
-            }
-
-            layout?.addView(textView);
-            history.post { history.fullScroll(View.FOCUS_DOWN) }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // called when img captured from camera intent
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            // set image captured to image view
+            val imageUri: Uri? = data!!.data
+            println(imageUri);
         }
     }
 
@@ -144,10 +138,45 @@ class ChatActivity : AppCompatActivity() {
 
         if(debug) println("onCreate");
 
+        viewModel.getAllMessages().observe(this, Observer<List<Message>> {
+            layout.removeAllViews()
+            for (message in it) {
+                val textView = TextView(this);
+                textView.text = message.text;
+                textView.setTextSize(25f);
+                if (message.belongsToCurrentUser){
+                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundResource(R.drawable.text_view_sent);
+
+                    textView.layoutParams= LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        gravity = Gravity.RIGHT
+                        bottomMargin = 10;
+                        topMargin = 10;
+                        rightMargin = 15;
+                    }
+                } else {
+                    textView.setTextColor(Color.BLACK);
+                    textView.setBackgroundResource(R.drawable.text_view_received);
+
+                    textView.layoutParams = LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        gravity = Gravity.LEFT
+                        bottomMargin = 10;
+                        topMargin = 10;
+                    }
+                }
+                layout?.addView(textView);
+            }
+            history.post { history.fullScroll(View.FOCUS_DOWN) }
+        })
+
         history = findViewById<ScrollView>(R.id.scrollView);
         layout = findViewById(R.id.history_layout);
         text_entry = findViewById(R.id.text_entry);
         button_send = findViewById(R.id.button_send);
-        loadHistory();
     }
 }
