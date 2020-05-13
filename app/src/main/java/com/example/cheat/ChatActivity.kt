@@ -1,8 +1,10 @@
 package com.example.cheat
 
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -39,9 +41,12 @@ class ChatActivity : AppCompatActivity() {
 
     fun openImages(view: View) {
         if(debug) println("openImages");
-        val intent = Intent(Intent.ACTION_PICK);
+        val intent = Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
+        // save image to local variable
+        // encode it.
+        // send to BT for transmission
     }
 
     fun loadHistory() {
@@ -97,6 +102,15 @@ class ChatActivity : AppCompatActivity() {
 
             layout?.addView(textView);
             history.post { history.fullScroll(View.FOCUS_DOWN) }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // called when img captured from camera intent
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            // set image captured to image view
+            val imageUri: Uri? = data!!.data
+            println(imageUri);
         }
     }
 
