@@ -3,10 +3,13 @@ package com.example.cheat
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +17,10 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_chat.*
 import androidx.lifecycle.Observer
 import com.example.cheat.CameraActivity
 import com.example.cheat.model.Message
-import kotlinx.android.synthetic.main.activity_chat.*
 import java.util.*
 
 
@@ -54,6 +57,34 @@ class ChatActivity : AppCompatActivity() {
         // send to BT for transmission
     }
 
+    fun loadHistory() {
+        if(debug) {
+            println("sendMessage");
+            var i = 0;
+            while(i < 15) {
+                val textView = TextView(this);
+                textView.text = "Message$i";
+                i++;
+
+                textView.setTextSize(25f);
+                textView.setTextColor(Color.BLACK);
+                textView.setBackgroundResource(R.drawable.text_view_received);
+
+                textView.layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    gravity = Gravity.LEFT
+                    bottomMargin = 10;
+                    topMargin = 10;
+                }
+
+                layout?.addView(textView);
+            }
+            history.post { history.fullScroll(View.FOCUS_DOWN) }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     fun sendMessage(view: View) {
 //         Do something in response to button click
@@ -72,6 +103,28 @@ class ChatActivity : AppCompatActivity() {
             val imageUri: Uri? = data!!.data
             println(imageUri);
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // called when img captured from camera intent
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            // set image captured to image view
+            val imageUri: Uri? = data!!.data
+            val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
+
+            val imageView = ImageView(this);
+
+            imageView.setImageURI(imageUri);
+
+            layout?.addView(imageView);
+            history.post { history.fullScroll(View.FOCUS_DOWN)}
+        }
+    }
+
+
+    private fun getPowerOfTwoForSampleRatio(ratio: Double): Int {
+        val k = Integer.highestOneBit(floor(ratio).toInt())
+        return if (k == 0) 1 else k
     }
 
 
