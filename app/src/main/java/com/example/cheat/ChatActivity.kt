@@ -141,6 +141,7 @@ class ChatActivity : AppCompatActivity() {
             layout.removeAllViews()
             for (message in it) {
                 val textView = TextView(this);
+                textView.id = message.uid
                 textView.text = message.text;
                 textView.setTextSize(25f);
                 if (message.belongsToCurrentUser){
