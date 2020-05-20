@@ -5,10 +5,10 @@ import android.bluetooth.BluetoothAdapter
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
-import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Trace.isEnabled
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -18,12 +18,10 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-import kotlinx.android.synthetic.main.activity_chat.*
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
-import android.content.ContentValues.TAG
-import java.io.File
+import java.text.DateFormat
+import java.text.DateFormat.getDateInstance
 import java.util.*
 
 
@@ -117,7 +115,7 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        if (BluetoothAdapter.getDefaultAdapter() != null) {
+        if (BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled()) {
             btEnabled = true
             bt = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
             bt.updateContext(this)
@@ -127,14 +125,19 @@ class ChatActivity : AppCompatActivity() {
         viewModel.deleteAllMessage()
 
         if(debug) println("onCreate");
+        val df: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        val tf: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
             for (message in it) {
                 val textView = TextView(this);
+                val textViewDate = TextView(this);
+                textViewDate.text = df.format(message.date) + " " + tf.format(message.date);
                 textView.id = message.uid
                 textView.text = message.text;
                 textView.setTextSize(25f);
+                textViewDate.setTextSize(17f);
                 if (message.belongsToCurrentUser){
                     textView.setTextColor(Color.WHITE);
                     textView.setBackgroundResource(R.drawable.text_view_sent);
@@ -143,10 +146,19 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                         gravity = Gravity.RIGHT
-                        bottomMargin = 10;
+                        bottomMargin = 2;
                         topMargin = 10;
                         rightMargin = 15;
                     }
+                    textViewDate.layoutParams= LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        gravity = Gravity.RIGHT
+                        bottomMargin = 10;
+                        topMargin = 0;
+                        rightMargin = 5;
+                    }
+
                 } else {
                     textView.setTextColor(Color.BLACK);
                     textView.setBackgroundResource(R.drawable.text_view_received);
@@ -156,11 +168,19 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply {
                         gravity = Gravity.LEFT
-                        bottomMargin = 10;
+                        bottomMargin = 2;
                         topMargin = 10;
+                    }
+                    textViewDate.layoutParams= LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        gravity = Gravity.LEFT
+                        bottomMargin = 10;
+                        topMargin = 0;
                     }
                 }
                 layout?.addView(textView);
+                layout?.addView(textViewDate);
             }
             history.post { history.fullScroll(View.FOCUS_DOWN) }
         })
