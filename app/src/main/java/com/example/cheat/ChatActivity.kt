@@ -2,15 +2,13 @@ package com.example.cheat
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Trace.isEnabled
+import android.os.Handler
 import android.provider.MediaStore
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -20,9 +18,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
-import java.text.DateFormat
-import java.text.DateFormat.getDateInstance
 import java.util.*
+import kotlin.system.exitProcess
 
 
 class ChatActivity : AppCompatActivity() {
@@ -43,6 +40,8 @@ class ChatActivity : AppCompatActivity() {
     lateinit var history: ScrollView;
 
     var nextUid: Int = 0;
+
+    lateinit var cheatingPartner: String;
 
     fun requestCamera(view: View) {
         if(debug) println("requestCamera");
@@ -67,6 +66,12 @@ class ChatActivity : AppCompatActivity() {
         if(!text_entry.text.isBlank()){
             if (btEnabled){
                 bt.writeMessage(text_entry.text.toString() + "\\0")
+                if(text_entry.text.toString().toLowerCase() == "/disconnect") {
+                    Toast.makeText(this, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
+                    //Why postDelayed? because otherwise we will never see the toast message above ...
+                    // Restarts the whole application - HOW CONVINIENT!!!
+                    Handler().postDelayed({exitProcess(0)}, 2000)
+                }
             }
             var message = Message(nextUid, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
@@ -77,7 +82,6 @@ class ChatActivity : AppCompatActivity() {
 
     fun receiveMessage(messageString : String) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        Log.d(TAG, "test12")
         var message = Message(nextUid, messageString, Date(), false)
         viewModel.insertMessage(message)
         nextUid++
@@ -115,29 +119,26 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
-        if (BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
             btEnabled = true
             bt = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
             bt.updateContext(this)
             bt.setChatActivity(this)
         }
 
+        cheatingPartner = intent.getStringExtra("cp")
+
         viewModel.deleteAllMessage()
 
         if(debug) println("onCreate");
-        val df: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        val tf: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
             for (message in it) {
                 val textView = TextView(this);
-                val textViewDate = TextView(this);
-                textViewDate.text = df.format(message.date) + " " + tf.format(message.date);
                 textView.id = message.uid
                 textView.text = message.text;
                 textView.setTextSize(25f);
-                textViewDate.setTextSize(17f);
                 if (message.belongsToCurrentUser){
                     textView.setTextColor(Color.WHITE);
                     textView.setBackgroundResource(R.drawable.text_view_sent);
@@ -146,19 +147,10 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                         gravity = Gravity.RIGHT
-                        bottomMargin = 2;
+                        bottomMargin = 10;
                         topMargin = 10;
                         rightMargin = 15;
                     }
-                    textViewDate.layoutParams= LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                        gravity = Gravity.RIGHT
-                        bottomMargin = 10;
-                        topMargin = 0;
-                        rightMargin = 5;
-                    }
-
                 } else {
                     textView.setTextColor(Color.BLACK);
                     textView.setBackgroundResource(R.drawable.text_view_received);
@@ -168,19 +160,11 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply {
                         gravity = Gravity.LEFT
-                        bottomMargin = 2;
-                        topMargin = 10;
-                    }
-                    textViewDate.layoutParams= LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                        gravity = Gravity.LEFT
                         bottomMargin = 10;
-                        topMargin = 0;
+                        topMargin = 10;
                     }
                 }
                 layout?.addView(textView);
-                layout?.addView(textViewDate);
             }
             history.post { history.fullScroll(View.FOCUS_DOWN) }
         })
