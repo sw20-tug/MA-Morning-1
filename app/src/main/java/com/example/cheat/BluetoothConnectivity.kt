@@ -45,8 +45,10 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
             } else if (BluetoothDevice.ACTION_FOUND == action) { //bluetooth device found
                 val device = intent.getParcelableExtra<Parcelable>(BluetoothDevice.EXTRA_DEVICE) as BluetoothDevice
                 val listEntry = device.name + " (" + device.address + ")"
-                list.add(listEntry)
-                deviceList[listEntry] = device
+                if(!list.contains(listEntry)) {
+                    list.add(listEntry)
+                    deviceList[listEntry] = device
+                }
             }
         }
     }
@@ -75,6 +77,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         list = ArrayList()
         checkForBondedDevices()
         startDiscovery()
+        list = list.distinct() as ArrayList<String>
         return list
     }
 
