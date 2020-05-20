@@ -180,6 +180,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                     mmServerSocket?.close();
                     shouldLoop = false;
                     Log.d(TAG, "Finished connecting to " + it.remoteDevice.name);
+                    activity.runOnUiThread(java.lang.Runnable {
+                        Toast.makeText(context, "Connected to " + it.remoteDevice.name, Toast.LENGTH_SHORT).show()
+                    })
                     manageMyConnectedThread(it);
                     activity.changeToChatActivity()
                     while (true) {
@@ -216,6 +219,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                     socket.connect();
                     manageMyConnectedThread(socket);
                     Log.d(TAG, "Finished connecting to " + dev.name);
+                    activity.runOnUiThread(java.lang.Runnable {
+                        Toast.makeText(context, "Connected to " + dev.name, Toast.LENGTH_SHORT).show()
+                    })
                 }
                 activity.changeToChatActivity()
                 while (true) {
