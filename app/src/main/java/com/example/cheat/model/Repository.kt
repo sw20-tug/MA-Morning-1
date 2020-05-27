@@ -13,6 +13,14 @@ class Repository(context: Context) {
         return messageDao.loadAllMessages()
     }
 
+    fun getMessageByText(text: String): Message {
+        return messageDao.getMessageByText(text)
+    }
+
+    fun getMessageByUUID(uuid: Int): Message {
+        return messageDao.getMessageByUUID(uuid)
+    }
+
     suspend fun insertMessage(message: Message) {
         insertMessageAsync(message)
     }

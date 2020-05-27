@@ -22,7 +22,7 @@ import java.util.*
 import kotlin.system.exitProcess
 import java.io.File
 import java.util.Base64
-
+import kotlin.random.Random
 
 class ChatActivity : AppCompatActivity() {
 
@@ -65,8 +65,9 @@ class ChatActivity : AppCompatActivity() {
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()){
+            var id = Random.nextInt()
             if (btEnabled){
-                bt.writeMessage(text_entry.text.toString() + "\\0")
+                bt.writeMessage(text_entry.text.toString() + "\\0", id)
                 if(text_entry.text.toString().toLowerCase() == "/disconnect") {
                     Toast.makeText(this, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
                     //Why postDelayed? because otherwise we will never see the toast message above ...
@@ -74,7 +75,7 @@ class ChatActivity : AppCompatActivity() {
                     Handler().postDelayed({exitProcess(0)}, 2000)
                 }
             }
-            var message = Message(nextUid, text_entry.text.toString(), Date(), true)
+            var message = Message(id, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
             text_entry.text = null;
             nextUid++
@@ -83,20 +84,21 @@ class ChatActivity : AppCompatActivity() {
 
     fun sendImage(encodedMsg: String) {
         if (btEnabled) {
-            bt.writeMessage("\\image" + encodedMsg + "\\0")
+            var id = Random.nextInt()
+            bt.writeImage(encodedMsg,id)
         }
     }
 
-
-    fun receiveMessage(messageString : String) {
+    fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        var message = Message(nextUid, messageString, Date(), false)
+        var message = Message(id, messageString, Date(), false)
         viewModel.insertMessage(message)
         nextUid++
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         // called when img captured from camera intent
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
@@ -108,8 +110,8 @@ class ChatActivity : AppCompatActivity() {
 
             imageView.setImageURI(imageUri)
 
-            val img_encoded = encoder(imageUri!!.getPath())
-
+            val imgEncoded = encoder(imageUri!!.getPath())
+            sendImage(imgEncoded)
 
             imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
             imageView.maxHeight = 400;
@@ -160,7 +162,8 @@ class ChatActivity : AppCompatActivity() {
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
-            for (message in it) {
+            val sorted = it.sortedBy { it.date }
+            for (message in sorted) {
                 val textView = TextView(this);
                 textView.id = message.uid
                 textView.text = message.text;
