@@ -127,9 +127,8 @@ class ChatActivity : AppCompatActivity() {
             bt = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
             bt.updateContext(this)
             bt.setChatActivity(this)
+            cheatingPartner = intent.getStringExtra("cp")
         }
-
-        cheatingPartner = intent.getStringExtra("cp")
 
         viewModel.deleteAllMessage()
 
