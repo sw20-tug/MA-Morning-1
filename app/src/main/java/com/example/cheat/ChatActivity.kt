@@ -3,6 +3,7 @@ package com.example.cheat
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
@@ -18,11 +19,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
-import java.util.*
-import kotlin.system.exitProcess
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.Base64
+import java.io.IOException
+import java.io.InputStream
+import java.util.*
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 class ChatActivity : AppCompatActivity() {
 
@@ -103,14 +106,15 @@ class ChatActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
             val imageUri: Uri? = data!!.data
-
+            val iStream: InputStream? = imageUri?.let { contentResolver.openInputStream(it) }
+            val bytes: ByteArray? = iStream?.let { getBytes(it) }
             val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
 
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri)
 
-            val imgEncoded = encoder(imageUri!!.getPath())
+            val imgEncoded = encoder(bytes)
             sendImage(imgEncoded)
 
             imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
@@ -122,9 +126,21 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    @Throws(IOException::class)
+    private fun getBytes(inputStream: InputStream): ByteArray {
+        val byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var len = 0
+        while (inputStream.read(buffer).also { len = it } != -1) {
+            byteBuffer.write(buffer, 0, len)
+        }
+        return byteBuffer.toByteArray()
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun encoder(filePath: String?): String{
-        val bytes = File(filePath).readBytes()
+    fun encoder(bytes: ByteArray?): String{
+        //val bytes = File(filePath).readBytes()
         val base64 = Base64.getEncoder().encodeToString(bytes)
         return base64
     }
