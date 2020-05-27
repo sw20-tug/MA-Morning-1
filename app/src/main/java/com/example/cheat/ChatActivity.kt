@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -19,8 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
 import java.util.*
-import kotlin.system.exitProcess
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 
 class ChatActivity : AppCompatActivity() {
@@ -74,19 +75,37 @@ class ChatActivity : AppCompatActivity() {
                     // Restarts the whole application - HOW CONVINIENT!!!
                     Handler().postDelayed({exitProcess(0)}, 2000)
                 }
+                else if(text_entry.text.toString().toLowerCase().startsWith("/edit")) {
+                    EditMessageTask(viewModel).execute(text_entry.text.toString())
+                    text_entry.text = null;
+                }
+                else if(text_entry.text.toString().toLowerCase().startsWith("/delete")) {
+                    DeleteMessageTask(viewModel).execute(text_entry.text.toString())
+                    text_entry.text = null;
+                }
+                else {
+                    var message = Message(id, text_entry.text.toString(), Date(), true)
+                    viewModel.insertMessage(message)
+                    text_entry.text = null;
+                    nextUid++
+                }
             }
-            var message = Message(id, text_entry.text.toString(), Date(), true)
-            viewModel.insertMessage(message)
-            text_entry.text = null;
-            nextUid++
         }
     }
 
     fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        var message = Message(id, messageString, Date(), false)
-        viewModel.insertMessage(message)
-        nextUid++
+        if(messageString.startsWith("/edit")) {
+            EditMessageTask(viewModel).execute(messageString)
+        }
+        else if(messageString.startsWith("/delete")) {
+            DeleteMessageTask(viewModel).execute(messageString)
+        }
+        else {
+            var message = Message(id, messageString, Date(), false)
+            viewModel.insertMessage(message)
+            nextUid++
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -176,5 +195,29 @@ class ChatActivity : AppCompatActivity() {
         layout = findViewById(R.id.history_layout);
         text_entry = findViewById(R.id.text_entry);
         button_send = findViewById(R.id.button_send);
+    }
+
+    private class EditMessageTask(viewModel: MessageViewModel) : AsyncTask<String?, Int?, Int>() {
+        private var viewModel = viewModel
+
+        override fun doInBackground(vararg params: String?): Int? {
+            var splitted = params.first()?.split(";")
+            var message = viewModel.getMessageByText(splitted!!.get(1))
+            message.text = splitted[2] + " (edited)"
+            viewModel.updateMessage(message)
+            return 0
+        }
+    }
+
+    private class DeleteMessageTask(viewModel: MessageViewModel) : AsyncTask<String?, Int?, Int>() {
+        private var viewModel = viewModel
+
+        override fun doInBackground(vararg params: String?): Int? {
+            var splitted = params.first()?.split(";")
+            var message = viewModel.getMessageByText(splitted!!.get(1))
+            message.text = "(deleted)"
+            viewModel.updateMessage(message)
+            return 0
+        }
     }
 }
