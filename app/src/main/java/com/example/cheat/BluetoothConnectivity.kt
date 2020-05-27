@@ -80,7 +80,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         list = ArrayList()
         checkForBondedDevices()
         startDiscovery()
-        list = list.distinct() as ArrayList<String>
+        list = ArrayList(list.distinct())
         return list
     }
 
