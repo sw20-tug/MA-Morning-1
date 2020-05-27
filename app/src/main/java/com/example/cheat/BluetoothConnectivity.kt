@@ -243,12 +243,30 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         }
     }
 
-    public fun writeMessage (message: String) {
+    public fun writeMessage (message: String, id: Int) {
         val r : ConnectedThread;
         synchronized(this) {
             r = this.connectedThread!!;
         }
-        r.write(message)
+        var messageToSend = "/write " + id + " " + message;
+        r.write(messageToSend)
+    }
+
+    public fun writeImage (message: String, id: Int) {
+        val r : ConnectedThread;
+        synchronized(this) {
+            r = this.connectedThread!!;
+        }
+        var messageToSend = "\\image " + id + " " + message;
+        r.write(messageToSend)
+    }
+
+    // Stub for editing messages
+    public fun editMessage (message: String, id: String) {
+    }
+
+    // Stub for deleting messages
+    public fun deleteMessage (id: String) {
     }
 
     inner class ConnectedThread(socket: BluetoothSocket, cp : String) : Thread() {
@@ -271,10 +289,12 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                     currentReceivedMessage += stringFromBytes;
                     if (stringFromBytes.contains("\\0")) {  // Message is finished
                         currentReceivedMessage = currentReceivedMessage.replace("\\0", "")
-                        if(currentReceivedMessage.toLowerCase() != "/disconnect") {
-                            chatActivity!!.receiveMessage(currentReceivedMessage)
-                        }
-                        else {
+                        var strings = currentReceivedMessage.split(" ");
+                        val operation = currentReceivedMessage.takeWhile { it != ' ' };
+                        // val operation = strings[0];
+                        val id = strings[1].toInt();
+                        currentReceivedMessage = strings.drop(2).joinToString(separator = " ");
+                        if(currentReceivedMessage.toLowerCase() == "/disconnect") {
                             chatActivity?.runOnUiThread(java.lang.Runnable {
                                 Toast.makeText(chatActivity, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
                             })
@@ -282,6 +302,11 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                             // Restarts the whole application - HOW CONVINIENT!!!
                             Handler(Looper.getMainLooper()).postDelayed({exitProcess(0)}, 2000)
                             break;
+                        }
+                        else if(operation == "/write") {
+                            chatActivity!!.receiveMessage(currentReceivedMessage, id)
+                        }
+                        else {
                         }
                         currentReceivedMessage = "";
                         Log.d(TAG, "Bluetooth-Read: This is what we received - " + stringFromBytes);

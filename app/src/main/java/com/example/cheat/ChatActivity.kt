@@ -20,7 +20,9 @@ import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
 import java.util.*
 import kotlin.system.exitProcess
-
+import java.io.File
+import java.util.Base64
+import kotlin.random.Random
 
 class ChatActivity : AppCompatActivity() {
 
@@ -43,6 +45,8 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var cheatingPartner: String;
 
+
+
     fun requestCamera(view: View) {
         if(debug) println("requestCamera");
 
@@ -55,17 +59,15 @@ class ChatActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
-        // save image to local variable
-        // encode it.
-        // send to BT for transmission
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()){
+            var id = Random.nextInt()
             if (btEnabled){
-                bt.writeMessage(text_entry.text.toString() + "\\0")
+                bt.writeMessage(text_entry.text.toString() + "\\0", id)
                 if(text_entry.text.toString().toLowerCase() == "/disconnect") {
                     Toast.makeText(this, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
                     //Why postDelayed? because otherwise we will never see the toast message above ...
@@ -73,30 +75,43 @@ class ChatActivity : AppCompatActivity() {
                     Handler().postDelayed({exitProcess(0)}, 2000)
                 }
             }
-            var message = Message(nextUid, text_entry.text.toString(), Date(), true)
+            var message = Message(id, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
             text_entry.text = null;
             nextUid++
         }
     }
 
-    fun receiveMessage(messageString : String) {
+    fun sendImage(encodedMsg: String) {
+        if (btEnabled) {
+            var id = Random.nextInt()
+            bt.writeImage(encodedMsg,id)
+        }
+    }
+
+    fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        var message = Message(nextUid, messageString, Date(), false)
+        var message = Message(id, messageString, Date(), false)
         viewModel.insertMessage(message)
         nextUid++
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         // called when img captured from camera intent
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
             val imageUri: Uri? = data!!.data
+
             val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
 
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri)
+
+            val imgEncoded = encoder(imageUri!!.getPath())
+            sendImage(imgEncoded)
 
             imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
             imageView.maxHeight = 400;
@@ -105,6 +120,19 @@ class ChatActivity : AppCompatActivity() {
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun encoder(filePath: String?): String{
+        val bytes = File(filePath).readBytes()
+        val base64 = Base64.getEncoder().encodeToString(bytes)
+        return base64
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun decoder(base64Str: String, pathFile: String): Unit{
+        val imageByteArray = Base64.getDecoder().decode(base64Str)
+        File(pathFile).writeBytes(imageByteArray)
     }
 
     fun onImageClick(photoUri: Uri) {
@@ -124,9 +152,8 @@ class ChatActivity : AppCompatActivity() {
             bt = BluetoothConnectivity.Companion.instance(this, BluetoothAdapter.getDefaultAdapter())
             bt.updateContext(this)
             bt.setChatActivity(this)
+            cheatingPartner = intent.getStringExtra("cp")
         }
-
-        cheatingPartner = intent.getStringExtra("cp")
 
         viewModel.deleteAllMessage()
 
@@ -134,7 +161,8 @@ class ChatActivity : AppCompatActivity() {
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
-            for (message in it) {
+            val sorted = it.sortedBy { it.date }
+            for (message in sorted) {
                 val textView = TextView(this);
                 textView.id = message.uid
                 textView.text = message.text;

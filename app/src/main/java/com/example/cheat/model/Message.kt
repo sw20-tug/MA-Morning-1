@@ -30,7 +30,7 @@ class Message(
     }
 
     override fun hashCode(): Int {
-        var result = uid
+        var result = uid.hashCode()
         result = 31 * result + (text?.hashCode() ?: 0)
         result = 31 * result + (date?.hashCode() ?: 0)
         result = 31 * result + belongsToCurrentUser.hashCode()
