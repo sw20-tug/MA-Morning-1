@@ -252,6 +252,14 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         r.write(messageToSend)
     }
 
+    // Stub for editing messages
+    public fun editMessage (message: String, id: String) {
+    }
+
+    // Stub for deleting messages
+    public fun deleteMessage (id: String) {
+    }
+
     inner class ConnectedThread(socket: BluetoothSocket, cp : String) : Thread() {
         private var socket : BluetoothSocket = socket;
         private var input : InputStream = socket.inputStream;
