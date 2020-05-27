@@ -88,6 +88,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         // called when img captured from camera intent
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
