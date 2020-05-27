@@ -136,7 +136,8 @@ class ChatActivity : AppCompatActivity() {
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
-            for (message in it) {
+            val sorted = it.sortedBy { it.date }
+            for (message in sorted) {
                 val textView = TextView(this);
                 textView.id = message.uid
                 textView.text = message.text;
