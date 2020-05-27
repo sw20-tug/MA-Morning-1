@@ -9,6 +9,8 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
@@ -18,6 +20,7 @@ import java.io.OutputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.system.exitProcess
 
 class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
     private var context : Context = cnt
@@ -154,8 +157,8 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         }
     }
 
-    fun manageMyConnectedThread(socket : BluetoothSocket) {
-        connectedThread = ConnectedThread(socket);
+    fun manageMyConnectedThread(socket : BluetoothSocket, cp : String) {
+        connectedThread = ConnectedThread(socket, cp);
         connectedThread!!.start();
     }
 
@@ -180,8 +183,11 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                     mmServerSocket?.close();
                     shouldLoop = false;
                     Log.d(TAG, "Finished connecting to " + it.remoteDevice.name);
-                    manageMyConnectedThread(it);
-                    activity.changeToChatActivity()
+                    activity.runOnUiThread(java.lang.Runnable {
+                        Toast.makeText(context, "Connected to " + it.remoteDevice.name, Toast.LENGTH_SHORT).show()
+                    })
+                    manageMyConnectedThread(it, it.remoteDevice.name);
+                    activity.changeToChatActivity(it.remoteDevice.name)
                     while (true) {
                         // Needs to be here as the thread is killed otherwise and we can't receive or send messages then
                     }
@@ -214,10 +220,13 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                 if(!socket.isConnected) {
                     Log.d(TAG, "Starting connecting to " + dev.name);
                     socket.connect();
-                    manageMyConnectedThread(socket);
+                    manageMyConnectedThread(socket, dev.name);
                     Log.d(TAG, "Finished connecting to " + dev.name);
+                    activity.runOnUiThread(java.lang.Runnable {
+                        Toast.makeText(context, "Connected to " + dev.name, Toast.LENGTH_SHORT).show()
+                    })
                 }
-                activity.changeToChatActivity()
+                activity.changeToChatActivity(dev.name)
                 while (true) {
                     // Needs to be here as the thread is killed otherwise and we can't receive or send messages then
                 }
@@ -242,12 +251,14 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         r.write(message)
     }
 
-    inner class ConnectedThread(socket: BluetoothSocket) : Thread() {
+    inner class ConnectedThread(socket: BluetoothSocket, cp : String) : Thread() {
         private var socket : BluetoothSocket = socket;
         private var input : InputStream = socket.inputStream;
         private var output : OutputStream = socket.outputStream;
 
         private var currentReceivedMessage : String = "";
+
+        var cheatingPartner : String = cp
 
         public override fun run() {
             // Todo: Remove the endless loop with an actual check
@@ -260,7 +271,18 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
                     currentReceivedMessage += stringFromBytes;
                     if (stringFromBytes.contains("\\0")) {  // Message is finished
                         currentReceivedMessage = currentReceivedMessage.replace("\\0", "")
-                        chatActivity!!.receiveMessage(currentReceivedMessage)
+                        if(currentReceivedMessage.toLowerCase() != "/disconnect") {
+                            chatActivity!!.receiveMessage(currentReceivedMessage)
+                        }
+                        else {
+                            chatActivity?.runOnUiThread(java.lang.Runnable {
+                                Toast.makeText(chatActivity, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
+                            })
+                            //Why postDelayed? because otherwise we will never see the toast message above ...
+                            // Restarts the whole application - HOW CONVINIENT!!!
+                            Handler(Looper.getMainLooper()).postDelayed({exitProcess(0)}, 2000)
+                            break;
+                        }
                         currentReceivedMessage = "";
                         Log.d(TAG, "Bluetooth-Read: This is what we received - " + stringFromBytes);
                     }

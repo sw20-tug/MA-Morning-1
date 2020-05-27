@@ -66,8 +66,9 @@ class StartActivity : AppCompatActivity() {
         refresh()
     }
 
-    public fun changeToChatActivity() {
+    public fun changeToChatActivity(cheatingPartner : String) {
         val intent = Intent(this,ChatActivity::class.java)
+        intent.putExtra("cp", cheatingPartner)
         startActivity(intent)
     }
 
