@@ -20,6 +20,7 @@ import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
 import java.util.*
 import kotlin.system.exitProcess
+import kotlin.random.Random
 
 
 class ChatActivity : AppCompatActivity() {
@@ -64,8 +65,9 @@ class ChatActivity : AppCompatActivity() {
     fun sendMessage(view: View) {
 //         Do something in response to button click
         if(!text_entry.text.isBlank()){
+            var id = Random.nextInt()
             if (btEnabled){
-                bt.writeMessage(text_entry.text.toString() + "\\0")
+                bt.writeMessage(text_entry.text.toString() + "\\0", id)
                 if(text_entry.text.toString().toLowerCase() == "/disconnect") {
                     Toast.makeText(this, "Disconnected from " + cheatingPartner, Toast.LENGTH_LONG).show()
                     //Why postDelayed? because otherwise we will never see the toast message above ...
@@ -73,16 +75,16 @@ class ChatActivity : AppCompatActivity() {
                     Handler().postDelayed({exitProcess(0)}, 2000)
                 }
             }
-            var message = Message(nextUid, text_entry.text.toString(), Date(), true)
+            var message = Message(id, text_entry.text.toString(), Date(), true)
             viewModel.insertMessage(message)
             text_entry.text = null;
             nextUid++
         }
     }
 
-    fun receiveMessage(messageString : String) {
+    fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        var message = Message(nextUid, messageString, Date(), false)
+        var message = Message(id, messageString, Date(), false)
         viewModel.insertMessage(message)
         nextUid++
     }
@@ -135,7 +137,8 @@ class ChatActivity : AppCompatActivity() {
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
-            for (message in it) {
+            val sorted = it.sortedBy { it.date }
+            for (message in sorted) {
                 val textView = TextView(this);
                 textView.id = message.uid
                 textView.text = message.text;
