@@ -4,13 +4,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import java.time.LocalDateTime
 import java.util.*
 
 @Entity
 class Message(
     @PrimaryKey val uid: Int,
-    @ColumnInfo(name = "text") val text: String?,
+    @ColumnInfo(name = "text") var text: String?,
     @field:TypeConverters(Converters::class)
     @ColumnInfo(name = "date") val date: Date?,
     @ColumnInfo(name = "belongs_to_current") val belongsToCurrentUser: Boolean){
