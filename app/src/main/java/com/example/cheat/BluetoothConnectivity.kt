@@ -30,6 +30,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
 
     private val serviceName: String = "CHEAT"
     private val serviceUUID: UUID = UUID.fromString("0b538899-008d-40ed-a0dc-6e657c3be729")
+    private val deviceNameConnectionMap: HashMap<String, ConnectedThread> = HashMap<String, ConnectedThread>();
 
     private var connectedThread : ConnectedThread? = null;
 
@@ -158,7 +159,9 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
     }
 
     fun manageMyConnectedThread(socket : BluetoothSocket, cp : String) {
-        connectedThread = ConnectedThread(socket, cp);
+        val newThread = ConnectedThread(socket, cp);
+        connectedThread = newThread;
+        deviceNameConnectionMap.put(cp, newThread);
         connectedThread!!.start();
     }
 
@@ -217,7 +220,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
             mmSocket?.use { socket ->
                 // Connect to the remote device through the socket. This call blocks
                 // until it succeeds or throws an exception.
-                if(!socket.isConnected) {
+                if(!socket.isConnected && !deviceNameConnectionMap.containsKey(dev.name)) {
                     Log.d(TAG, "Starting connecting to " + dev.name);
                     socket.connect();
                     manageMyConnectedThread(socket, dev.name);
