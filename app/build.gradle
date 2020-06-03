@@ -75,4 +75,5 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$activity_version"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
 }
