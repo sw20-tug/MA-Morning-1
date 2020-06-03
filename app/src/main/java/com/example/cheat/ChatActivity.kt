@@ -47,8 +47,6 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var history: ScrollView;
 
-    var nextUid: Int = 0;
-
     lateinit var cheatingPartner: String;
 
 
@@ -92,8 +90,11 @@ class ChatActivity : AppCompatActivity() {
                     var message = Message(id, text_entry.text.toString(), Date(), true)
                     viewModel.insertMessage(message)
                     text_entry.text = null;
-                    nextUid++
                 }
+            } else {
+                var message = Message(id, text_entry.text.toString(), Date(), true)
+                viewModel.insertMessage(message)
+                text_entry.text = null;
             }
         }
     }
@@ -116,7 +117,6 @@ class ChatActivity : AppCompatActivity() {
         else {
             var message = Message(id, messageString, Date(), false)
             viewModel.insertMessage(message)
-            nextUid++
         }
     }
 
