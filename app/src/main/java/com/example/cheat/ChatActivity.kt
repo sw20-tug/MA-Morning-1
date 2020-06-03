@@ -3,8 +3,10 @@ package com.example.cheat
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Color
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -18,9 +20,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.util.*
-import kotlin.system.exitProcess
 import kotlin.random.Random
+import kotlin.system.exitProcess
 
 
 class ChatActivity : AppCompatActivity() {
@@ -44,6 +50,8 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var cheatingPartner: String;
 
+
+
     fun requestCamera(view: View) {
         if(debug) println("requestCamera");
 
@@ -56,9 +64,6 @@ class ChatActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
-        // save image to local variable
-        // encode it.
-        // send to BT for transmission
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -74,32 +79,63 @@ class ChatActivity : AppCompatActivity() {
                     // Restarts the whole application - HOW CONVINIENT!!!
                     Handler().postDelayed({exitProcess(0)}, 2000)
                 }
+                else if(text_entry.text.toString().toLowerCase().startsWith("/edit")) {
+                    EditMessageTask(viewModel).execute(text_entry.text.toString())
+                    text_entry.text = null;
+                }
+                else if(text_entry.text.toString().toLowerCase().startsWith("/delete")) {
+                    DeleteMessageTask(viewModel).execute(text_entry.text.toString())
+                    text_entry.text = null;
+                }
+                else {
+                    var message = Message(id, text_entry.text.toString(), Date(), true)
+                    viewModel.insertMessage(message)
+                    text_entry.text = null;
+                    nextUid++
+                }
             }
-            var message = Message(id, text_entry.text.toString(), Date(), true)
-            viewModel.insertMessage(message)
-            text_entry.text = null;
-            nextUid++
+        }
+    }
+
+    fun sendImage(encodedMsg: String) {
+        if (btEnabled) {
+            var id = Random.nextInt()
+            bt.writeImage(encodedMsg,id)
         }
     }
 
     fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
-        var message = Message(id, messageString, Date(), false)
-        viewModel.insertMessage(message)
-        nextUid++
+        if(messageString.startsWith("/edit")) {
+            EditMessageTask(viewModel).execute(messageString)
+        }
+        else if(messageString.startsWith("/delete")) {
+            DeleteMessageTask(viewModel).execute(messageString)
+        }
+        else {
+            var message = Message(id, messageString, Date(), false)
+            viewModel.insertMessage(message)
+            nextUid++
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // called when img captured from camera intent
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
             val imageUri: Uri? = data!!.data
+            val iStream: InputStream? = imageUri?.let { contentResolver.openInputStream(it) }
+            val bytes: ByteArray? = iStream?.let { getBytes(it) }
             val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
 
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri)
+
+            val imgEncoded = encoder(bytes)
+            sendImage(imgEncoded)
 
             imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
             imageView.maxHeight = 400;
@@ -108,6 +144,31 @@ class ChatActivity : AppCompatActivity() {
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
         }
+    }
+
+    @Throws(IOException::class)
+    private fun getBytes(inputStream: InputStream): ByteArray {
+        val byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var len = 0
+        while (inputStream.read(buffer).also { len = it } != -1) {
+            byteBuffer.write(buffer, 0, len)
+        }
+        return byteBuffer.toByteArray()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun encoder(bytes: ByteArray?): String{
+        //val bytes = File(filePath).readBytes()
+        val base64 = Base64.getEncoder().encodeToString(bytes)
+        return base64
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun decoder(base64Str: String, pathFile: String): Unit{
+        val imageByteArray = Base64.getDecoder().decode(base64Str)
+        File(pathFile).writeBytes(imageByteArray)
     }
 
     fun onImageClick(photoUri: Uri) {
@@ -176,5 +237,29 @@ class ChatActivity : AppCompatActivity() {
         layout = findViewById(R.id.history_layout);
         text_entry = findViewById(R.id.text_entry);
         button_send = findViewById(R.id.button_send);
+    }
+
+    private class EditMessageTask(viewModel: MessageViewModel) : AsyncTask<String?, Int?, Int>() {
+        private var viewModel = viewModel
+
+        override fun doInBackground(vararg params: String?): Int? {
+            var splitted = params.first()?.split(";")
+            var message = viewModel.getMessageByText(splitted!!.get(1))
+            message.text = splitted[2] + " (edited)"
+            viewModel.updateMessage(message)
+            return 0
+        }
+    }
+
+    private class DeleteMessageTask(viewModel: MessageViewModel) : AsyncTask<String?, Int?, Int>() {
+        private var viewModel = viewModel
+
+        override fun doInBackground(vararg params: String?): Int? {
+            var splitted = params.first()?.split(";")
+            var message = viewModel.getMessageByText(splitted!!.get(1))
+            message.text = "(deleted)"
+            viewModel.updateMessage(message)
+            return 0
+        }
     }
 }
