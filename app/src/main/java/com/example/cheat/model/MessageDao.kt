@@ -17,4 +17,13 @@ interface MessageDao {
 
     @Delete
     fun delete(msg: Message)
+
+    @Query("DELETE FROM Message")
+    fun deleteAllMessage()
+
+    @Query("SELECT * FROM Message WHERE text = :sText")
+    fun getMessageByText(sText: String): Message
+
+    @Query("SELECT * FROM Message WHERE uid = :sUid")
+    fun getMessageByUUID(sUid: Int): Message
 }

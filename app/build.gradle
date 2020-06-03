@@ -46,6 +46,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     androidTestImplementation "androidx.arch.core:core-testing:2.0.1"
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
     compile "org.jetbrains.anko:anko-common:0.8.3"
 
 
@@ -73,4 +75,5 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$activity_version"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
 }

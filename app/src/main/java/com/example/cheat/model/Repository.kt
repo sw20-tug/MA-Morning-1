@@ -13,6 +13,14 @@ class Repository(context: Context) {
         return messageDao.loadAllMessages()
     }
 
+    fun getMessageByText(text: String): Message {
+        return messageDao.getMessageByText(text)
+    }
+
+    fun getMessageByUUID(uuid: Int): Message {
+        return messageDao.getMessageByUUID(uuid)
+    }
+
     suspend fun insertMessage(message: Message) {
         insertMessageAsync(message)
     }
@@ -23,6 +31,10 @@ class Repository(context: Context) {
 
     suspend fun deleteMessage(message: Message) {
         deleteMessageAsync(message)
+    }
+
+    suspend fun deleteAllMessage() {
+        deleteAllMessageAsync()
     }
 
     private suspend fun insertMessageAsync(message: Message) {
@@ -40,6 +52,12 @@ class Repository(context: Context) {
     private suspend fun deleteMessageAsync(message: Message) {
         withContext(Dispatchers.IO) {
             messageDao.delete(message)
+        }
+    }
+
+    private suspend fun deleteAllMessageAsync() {
+        withContext(Dispatchers.IO) {
+            messageDao.deleteAllMessage()
         }
     }
 }

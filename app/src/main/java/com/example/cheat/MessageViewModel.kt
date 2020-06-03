@@ -16,6 +16,14 @@ class MessageViewModel(application: Application): AndroidViewModel(application) 
         return repository.getAllMessages()
     }
 
+    fun getMessageByText(text: String): Message {
+        return repository.getMessageByText(text)
+    }
+
+    fun getMessageByUUID(uuid: Int): Message {
+        return repository.getMessageByUUID(uuid)
+    }
+
     fun insertMessage(message: Message) {
         viewModelScope.launch { repository.insertMessage(message) }
     }
@@ -26,5 +34,9 @@ class MessageViewModel(application: Application): AndroidViewModel(application) 
 
     fun deleteMessage(message: Message) {
         viewModelScope.launch { repository.deleteMessage(message) }
+    }
+
+    fun deleteAllMessage() {
+        viewModelScope.launch { repository.deleteAllMessage() }
     }
 }
