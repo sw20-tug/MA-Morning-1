@@ -33,6 +33,7 @@ class CameraActivity : AppCompatActivity() {
     var image_uri: Uri? = null
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
@@ -91,7 +92,7 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // called when img captured from camera intent
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK){
             // set image captured to image view
             image_view.setImageURI(image_uri)
 
@@ -106,6 +107,8 @@ class CameraActivity : AppCompatActivity() {
             //add to main layout
             image_box.addView(newImage)
         }
+
+
     }
 
     lateinit var currentPhotoPath: String

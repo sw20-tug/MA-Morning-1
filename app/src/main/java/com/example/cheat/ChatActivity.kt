@@ -3,6 +3,7 @@ package com.example.cheat
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Color
 import android.net.Uri
 import android.os.AsyncTask
@@ -20,6 +21,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
 import java.text.DateFormat
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.util.*
 import kotlin.random.Random
 import kotlin.system.exitProcess
@@ -46,6 +51,8 @@ class ChatActivity : AppCompatActivity() {
 
     lateinit var cheatingPartner: String;
 
+
+
     fun requestCamera(view: View) {
         if(debug) println("requestCamera");
 
@@ -58,9 +65,6 @@ class ChatActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
-        // save image to local variable
-        // encode it.
-        // send to BT for transmission
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -94,6 +98,13 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    fun sendImage(encodedMsg: String) {
+        if (btEnabled) {
+            var id = Random.nextInt()
+            bt.writeImage(encodedMsg,id)
+        }
+    }
+
     fun receiveMessage(messageString : String, id: Int) {
         // TODO: Check the Date functionality - maybe get that from the sender device?
         if(messageString.startsWith("/edit")) {
@@ -109,17 +120,23 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         // called when img captured from camera intent
         if (resultCode == Activity.RESULT_OK && data != null) {
             // set image captured to image view
             val imageUri: Uri? = data!!.data
+            val iStream: InputStream? = imageUri?.let { contentResolver.openInputStream(it) }
+            val bytes: ByteArray? = iStream?.let { getBytes(it) }
             val bitmap =  MediaStore.Images.Media.getBitmap(this.contentResolver, imageUri);
 
             val imageView = ImageView(this);
 
             imageView.setImageURI(imageUri)
+
+            val imgEncoded = encoder(bytes)
+            sendImage(imgEncoded)
 
             imageView.setOnClickListener() {v -> onImageClick(imageUri!!)};
             imageView.maxHeight = 400;
@@ -128,6 +145,31 @@ class ChatActivity : AppCompatActivity() {
             layout?.addView(imageView);
             history.post { history.fullScroll(View.FOCUS_DOWN)}
         }
+    }
+
+    @Throws(IOException::class)
+    private fun getBytes(inputStream: InputStream): ByteArray {
+        val byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var len = 0
+        while (inputStream.read(buffer).also { len = it } != -1) {
+            byteBuffer.write(buffer, 0, len)
+        }
+        return byteBuffer.toByteArray()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun encoder(bytes: ByteArray?): String{
+        //val bytes = File(filePath).readBytes()
+        val base64 = Base64.getEncoder().encodeToString(bytes)
+        return base64
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun decoder(base64Str: String, pathFile: String): Unit{
+        val imageByteArray = Base64.getDecoder().decode(base64Str)
+        File(pathFile).writeBytes(imageByteArray)
     }
 
     fun onImageClick(photoUri: Uri) {
