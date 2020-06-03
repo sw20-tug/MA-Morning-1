@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.cheat.model.Message
+import java.text.DateFormat
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -194,15 +195,20 @@ class ChatActivity : AppCompatActivity() {
         viewModel.deleteAllMessage()
 
         if(debug) println("onCreate");
+        val df: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        val tf: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
         viewModel.getAllMessages().observe(this, Observer<List<Message>> {
             layout.removeAllViews()
             val sorted = it.sortedBy { it.date }
             for (message in sorted) {
                 val textView = TextView(this);
+                val textViewDate = TextView(this);
+                textViewDate.text = df.format(message.date) + " " + tf.format(message.date);
                 textView.id = message.uid
                 textView.text = message.text;
                 textView.setTextSize(25f);
+                textViewDate.setTextSize(17f);
                 if (message.belongsToCurrentUser){
                     textView.setTextColor(Color.WHITE);
                     textView.setBackgroundResource(R.drawable.text_view_sent);
@@ -211,9 +217,17 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                         gravity = Gravity.RIGHT
-                        bottomMargin = 10;
+                        bottomMargin = 2;
                         topMargin = 10;
                         rightMargin = 15;
+                    }
+                    textViewDate.layoutParams= LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        gravity = Gravity.RIGHT
+                        bottomMargin = 10;
+                        topMargin = 0;
+                        rightMargin = 5;
                     }
                 } else {
                     textView.setTextColor(Color.BLACK);
@@ -224,11 +238,19 @@ class ChatActivity : AppCompatActivity() {
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply {
                         gravity = Gravity.LEFT
-                        bottomMargin = 10;
+                        bottomMargin = 2;
                         topMargin = 10;
+                    }
+                    textViewDate.layoutParams= LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        gravity = Gravity.LEFT
+                        bottomMargin = 10;
+                        topMargin = 0;
                     }
                 }
                 layout?.addView(textView);
+                layout?.addView(textViewDate);
             }
             history.post { history.fullScroll(View.FOCUS_DOWN) }
         })
