@@ -94,6 +94,10 @@ class ChatActivity : AppCompatActivity() {
                     text_entry.text = null;
                     nextUid++
                 }
+            } else {
+                var message = Message(id, text_entry.text.toString(), Date(), true)
+                viewModel.insertMessage(message)
+                text_entry.text = null;
             }
         }
     }
