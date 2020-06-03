@@ -80,7 +80,7 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
         list = ArrayList()
         checkForBondedDevices()
         startDiscovery()
-        list = list.distinct() as ArrayList<String>
+        list = ArrayList(list.distinct())
         return list
     }
 
@@ -249,6 +249,15 @@ class BluetoothConnectivity constructor(cnt : Context, blt : BluetoothAdapter){
             r = this.connectedThread!!;
         }
         var messageToSend = "/write " + id + " " + message;
+        r.write(messageToSend)
+    }
+
+    public fun writeImage (message: String, id: Int) {
+        val r : ConnectedThread;
+        synchronized(this) {
+            r = this.connectedThread!!;
+        }
+        var messageToSend = "\\image " + id + " " + message;
         r.write(messageToSend)
     }
 
